@@ -426,4 +426,6 @@ Plan: docs/superpowers/plans/2026-10-28-ruffle-together.md · Spec: docs/superpo
   windows direct, the same fingerprint at frame 5274. Live relay with the packaged exe: BIC 1500 frames room APA5V
   in sync. Zip sha256 5d7395cfccd246235b5e5ed5eba5bac0d6d8ef2fbb56691050ca51ad3d30d6dc (re-downloaded, same), exe
   4d745f49526e39fabb14f0e9bad17d6e8140b2e293c18b25b16cd0354342005a. Docs site 446fc53 (1.0.4 and 1.0.5).
-  mods-info not changed yet (asked first; max_players 8 for rooms over 4).
+  mods-info 7ecf0bb (user: "bump mods-info"; rc-1.0.5, max_players 8, live). Public relay with the packaged exe:
+  6 headless CF2 players room 843JQ 3000 frames in sync (median 186 ms); a first try a minute after the push hung
+  (two players never got in), likely before the relay re-read mods-info.
