@@ -1,14 +1,16 @@
 # Ruffle Together
 
-Version 1.0.4 (build id `rc-1.0.4#<commit>`; players must use the same build).
+Version 1.0.5 (build id `rc-1.0.5#<commit>`; players must use the same build).
 
-Play a local-multiplayer Flash game online with up to 3 friends. Every PC runs the same game in this Ruffle
+Play a local-multiplayer Flash game online with up to 7 friends (as many as the game has players). Every PC runs the same game in this Ruffle
 build; only the key presses travel, and every frame runs on every PC with every player's keys. Everyone gets
 the same small input delay (the host picks it from the ping: 1 frame on a LAN), and the games are compared
 every 25 frames: if they ever differ, every window says so ("THE TWO GAMES ARE OUT OF SYNC: restart the level").
 
-Games with keys: Territory War, 2 to 4 players hot-seat (`--coop-keys territory-war`), Bad Ice-Cream, 2 players (`BadIceCream_coop.swf`, made by the Bad Ice-Cream mod's
-`build.py --no-net`; the default), and Gun Mayhem 2, 2 to 4 players (`--coop-keys gun-mayhem-2`).
+Games with keys: Territory War, 2 to 4 players hot-seat (`--coop-keys territory-war`), Bad Ice-Cream, 2 players
+(`BadIceCream_coop.swf`, made by the Bad Ice-Cream mod's `build.py --no-net`; the default), Gun Mayhem 2, 2 to 4
+players (`--coop-keys gun-mayhem-2`), and Chaos Faction 2, 2 to 6 players (`--coop-keys chaos-faction-2`; players 3
+to 6 need its 6-player co-op SWF).
 Every player needs the **same game file** and the **same Ruffle Together build**; anything else is refused
 when they connect.
 
@@ -37,7 +39,7 @@ The relay needs the `ruffle-coop` game in mods-info first.
 
 - Each player uses their own normal keys: arrows or WASD to move. Bad Ice-Cream: Space, Enter or F to shoot.
   Gun Mayhem 2: Z or T to shoot, X or Y for a grenade. The host is player 1, friends follow in join order.
-- `--coop-players N` (host): start with N players (2-4, as many as the game has keys for); the game starts
+- `--coop-players N` (host): start with N players (2-8, as many as the game has keys for); the game starts
   once all have joined. `--coop-keys <game>`: every player must give the same.
 - Every player has their own mouse, but by default only the host's is in the game. A game's key map (or the game)
   lets friends' mice in where they belong, e.g. each player on their own card of a character screen; there they
@@ -104,7 +106,7 @@ A game made for Ruffle Together can ask about the players through `ExternalInter
 
 | Call | Returns |
 |---|---|
-| `ExternalInterface.call("coop.players")` | number of players in the session (2-4) |
+| `ExternalInterface.call("coop.players")` | number of players in the session (2-8) |
 | `ExternalInterface.call("coop.localSlot")` | this PC's player slot (0 = host). **Never for gameplay**, see below |
 | `ExternalInterface.call("coop.mouseX", slot)` | that slot's mouse x, in stage pixels (the same space as `_root._xmouse` / `stage.mouseX`) |
 | `ExternalInterface.call("coop.mouseY", slot)` | that slot's mouse y |
