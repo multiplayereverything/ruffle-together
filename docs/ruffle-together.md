@@ -87,7 +87,7 @@ slot 1: UP=87 DOWN=83 LEFT=65 RIGHT=68 FIRE=84 ALT=89
 local: UP=38,87 DOWN=40,83 LEFT=37,65 RIGHT=39,68 FIRE=90,84 ALT=88,89
 ```
 
-- `slot N:` (0-3, in order): what that player's buttons press in the game, as Flash key codes. The number of
+- `slot N:` (0-7, in order): what that player's buttons press in the game, as Flash key codes. The number of
   slots is how many players the game can have.
 - `local:`: the keys a player presses on their own PC for each button (key codes; several per button).
 - Buttons: UP DOWN LEFT RIGHT FIRE ALT KEY1 KEY2 KEY3 KEY4 VIEW QUIT YES NO MENU (the same names as in input scripts).

@@ -301,7 +301,7 @@ impl Game {
                     let slot = slot.trim().parse::<u8>().ok().filter(|&s| s > 0 && (s as usize) < MAX_PLAYERS)?;
                     Some((slot, MouseMode::named(mode.trim())?))
                 })()
-                .ok_or_else(|| fail("expected mouse N: host, zones, buttons or all (N is 1 to 3)".into()))?;
+                .ok_or_else(|| fail(format!("expected mouse N: host, zones, buttons or all (N is 1 to {})", MAX_PLAYERS - 1)))?;
                 game.mouse_modes.push(one);
             } else if let Some(cursors) = line.strip_prefix("cursors:") {
                 game.cursors = Some(Cursors::named(cursors.trim()).ok_or_else(|| fail(format!("cursors is auto, on or off: {cursors}")))?);

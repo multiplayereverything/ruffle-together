@@ -57,7 +57,7 @@ local value that reaches gameplay makes the PCs' games split (the window title s
 
 | Call | Kind | Answer |
 |---|---|---|
-| `coop.players` | shared | Number of players, 2 to 4 |
+| `coop.players` | shared | Number of players, 2 to 8 (as many as the game's key map has slots for) |
 | `coop.name(slot)` | shared | That player's name (what they joined with) |
 | `coop.localSlot` | **local** | This PC's slot |
 | `coop.isHost` | **local** | `true` on the host's PC |
@@ -96,7 +96,7 @@ is outside the stage, so it neither hovers nor clicks:
 | Call | Kind | Effect |
 |---|---|---|
 | `coop.mouse(mode)` | shared | Every friend's mouse: `"host"` (the default): not in the game. `"zones"`: only on something clickable inside their own zone (below), like their own card on a character screen; the host's is everywhere else. `"buttons"`: on anything the game made clickable (what shows the hand cursor: buttons, button-mode clips, links). `"all"`: anywhere. Resets `coop.mouse(slot, mode)` |
-| `coop.mouse(slot, mode)` | shared | One friend's mouse (slot 1 to 3), over what `coop.mouse(mode)` says: `coop.mouse(2, "host")` keeps player 3 out |
+| `coop.mouse(slot, mode)` | shared | One friend's mouse (slot 1 to 7), over what `coop.mouse(mode)` says: `coop.mouse(2, "host")` keeps player 3 out |
 | `coop.zone(slot, path)` | shared | The buttons inside the clip at `path` (`"_root.players.p2"`) belong to that player: their own card on a character screen. Nobody else's mouse may click them, the host's included. It only applies while that clip is on show, so other screens are untouched. When zones nest, the most exact clip wins (`zone 0: _root.players.p2.combo` gives a card's drop-down back to the host) |
 | `coop.zone(slot, x, y, w, h)` | shared | The same for a box (stage pixels). A box applies on every screen, so prefer a clip. `coop.zone(slot)` clears that player's zones |
 | `coop.hover(mode)` | picture only | How each screen draws Button symbols while friends have mice. `"own"` (the default): as its own player's mouse sees them, in the game's own Up, Over and Down art (AS3 `SimpleButton` and AS2 buttons; an AS2 state with a movie clip the button doesn't show right now is drawn as the game has it). `"shared"`: as the game has them, every player's hover on every screen. Hover made by the game's code (a clip that moves on `ROLL_OVER`) is game state, so it shows on every screen either way |
@@ -184,7 +184,7 @@ the button.
 |---|---|
 | `--coop-host PORT`, `--coop-host-relay RELAY` | Host directly or through the relay (prints the room code) |
 | `--coop-join ADDRESS`, `--coop-join-relay RELAY --coop-code CODE` | Join |
-| `--coop-players N` | Host: 2 to 4 players |
+| `--coop-players N` | Host: 2 to 8 players (as many as the key map has slots for) |
 | `--coop-keys NAME_OR_FILE` | The key map (every player the same) |
 | `--coop-name NAME` | This player's name |
 | `--coop-option NAME=VALUE` | Host: a game setting for `coop.option` (repeat for more) |
