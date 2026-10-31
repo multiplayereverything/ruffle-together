@@ -931,10 +931,19 @@ local: FIRE=27").expect("map");
     #[test]
     fn chaos_faction_2_keys() {
         let cf = game("chaos-faction-2");
-        assert_eq!(cf.max_players(), 2);
+        assert_eq!(cf.max_players(), 6);
         let mut keys = cf.keys();
         assert_eq!(down_keys(&keys.events(0, FIRE | KEY3)), vec![PhysicalKey::KeyZ, PhysicalKey::ShiftLeft]);
         assert_eq!(down_keys(&keys.events(1, FIRE | KEY3)), vec![PhysicalKey::Numpad1, PhysicalKey::Numpad0]);
+        // players 3-6 (the mod's extra fighters): 9 keys each, none another slot sends
+        let mut fresh = cf.keys();
+        let mut all: Vec<PhysicalKey> = (0..6)
+            .flat_map(|slot| down_keys(&fresh.events(slot, UP | DOWN | LEFT | RIGHT | FIRE | ALT | KEY1 | KEY2 | KEY3)))
+            .collect();
+        assert_eq!(all.len(), 6 * 9);
+        all.sort_by_key(|k| format!("{k:?}"));
+        all.dedup();
+        assert_eq!(all.len(), 6 * 9, "every slot its own codes");
         assert_eq!(down_keys(&keys.events(0, MENU)), vec![PhysicalKey::Space], "Space pauses");
         assert!(down_keys(&keys.events(1, MENU)).is_empty(), "only the host pauses");
         assert_eq!(cf.local_buttons(&held(&[PhysicalKey::KeyT])), KEY1);

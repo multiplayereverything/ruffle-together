@@ -1,17 +1,31 @@
-# Chaos Faction 2 (Deathmatch, 2 players: P1 "Keyboard 1", P2 "Keyboard 2").
+# Chaos Faction 2 (Deathmatch, 2 to 6 players: P1 "Keyboard 1", P2 "Keyboard 2"; with the mod, players 3-6 take
+# the 3rd to 6th fighter on the players page, which the host turns on).
 # In a session the mod pins the game's own key variables to these codes (src/cf2.as), so the game's
 # solo and 2-player key sets and any rebinding in Settings don't matter.
 # FIRE = punch, ALT = kick, KEY1 = taunt, KEY2 = drop weapon, KEY3 = hold to punch while holding a weapon,
 # MENU = the game's own pause (host only).
 slot 0: UP=38 DOWN=40 LEFT=37 RIGHT=39 FIRE=90 ALT=88 KEY1=84 KEY2=68 KEY3=16 MENU=32
 slot 1: UP=104 DOWN=101 LEFT=100 RIGHT=102 FIRE=97 ALT=98 KEY1=105 KEY2=99 KEY3=96
+# Players 3-6: codes the game never reads on its own (the mod gives fighters 3-6 these keys in a session).
+slot 2: UP=73 DOWN=75 LEFT=74 RIGHT=76 FIRE=85 ALT=79 KEY1=89 KEY2=72 KEY3=78
+slot 3: UP=87 DOWN=83 LEFT=65 RIGHT=70 FIRE=81 ALT=69 KEY1=82 KEY2=71 KEY3=86
+slot 4: UP=50 DOWN=51 LEFT=52 RIGHT=53 FIRE=54 ALT=55 KEY1=56 KEY2=57 KEY3=48
+slot 5: UP=66 DOWN=67 LEFT=77 RIGHT=80 FIRE=49 ALT=106 KEY1=107 KEY2=109 KEY3=110
 local: UP=38 DOWN=40 LEFT=37 RIGHT=39 FIRE=90 ALT=88 KEY1=84 KEY2=68 KEY3=16 MENU=32
-# Character screen: the friend clicks only the buttons of their own card (_root.players.p2: arrows, Edit
-# Player), not its Keyboard 2 drop-down (the host's); the host clicks everything else. These clips exist
+# Character screen: each friend clicks only the buttons of their own card (_root.players.p2 to p6: arrows, Edit
+# Player), not its type drop-down (the host's); the host clicks everything else. These clips exist
 # only on the players page, so every other screen is the host's alone.
 mouse: zones
 zone 1: _root.players.p2
 zone 0: _root.players.p2.combo
+zone 2: _root.players.p3
+zone 0: _root.players.p3.combo
+zone 3: _root.players.p4
+zone 0: _root.players.p4.combo
+zone 4: _root.players.p5
+zone 0: _root.players.p5.combo
+zone 5: _root.players.p6
+zone 0: _root.players.p6.combo
 # The Player Editor (Edit Player on a card) is private: only the player whose click opened it sees and clicks
 # it; everyone else's mouse goes through it. The game has one editor, so while it is open nobody else's Edit
 # Player button works (they see "... has that open").
