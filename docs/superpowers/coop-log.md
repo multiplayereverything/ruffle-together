@@ -417,3 +417,13 @@ Plan: docs/superpowers/plans/2026-10-28-ruffle-together.md · Spec: docs/superpo
   165.232.82.11:25569 with the packaged exe: BIC 1500 frames (room EFM8K) and API demo 1500 frames (room UDRUE)
   desync_at=none. Zip sha256 ff4b25ad20b8dd677e0def2787ee18723009edc2820d575b151c4dfc0dea23e2 (re-downloaded, same),
   exe 38d2b25287478d311818faa613935f93693dfe152eb3de1f6c4f57f9498ca034. mods-info 12777dd (user: "bump mods-info"; rc-1.0.4, live). Read the Docs did not build 6fe08df (last build 78d91c9): the new page needs a manual build.
+- Release 1.0.5 (0703088, user: "commit this and merge this and make a new release if needed"): up to 8 players
+  (d1bbd90), a mouse for each of the 8 (bbf95d6: core MAX_POINTERS 8, a slot core has no mouse for stays off), the
+  Chaos Faction 2 key map for 6 (c119198; the mod's 6-player SWF is ai-work-flash-games 7507968, not on flash-games
+  yet). Tests 163/163; replays BIC fa623659, GM2 8e30f66c, TW ad6fe22d, API demo 4p 10073f2d twice, CF2 2p 67a7e305
+  twice (all as 1.0.4); CF2 6p replay twice 09967baa; buttons_check --at 2600: every fighter moves/punches/kicks,
+  weapons on the lab SWF, P2's taunt never fires (as on 1.0); lab 6 players relay (40 ms) and direct in sync; 6 real
+  windows direct, the same fingerprint at frame 5274. Live relay with the packaged exe: BIC 1500 frames room APA5V
+  in sync. Zip sha256 5d7395cfccd246235b5e5ed5eba5bac0d6d8ef2fbb56691050ca51ad3d30d6dc (re-downloaded, same), exe
+  4d745f49526e39fabb14f0e9bad17d6e8140b2e293c18b25b16cd0354342005a. Docs site 446fc53 (1.0.4 and 1.0.5).
+  mods-info not changed yet (asked first; max_players 8 for rooms over 4).
