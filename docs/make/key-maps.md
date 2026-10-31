@@ -14,7 +14,7 @@ local: UP=38,87 DOWN=40,83 LEFT=37,65 RIGHT=39,68 FIRE=90,84 ALT=88,89
 ```
 
 `slot N:`
-: What player N's buttons press **in the game**, as Flash key codes. Slots go 0 to 3, in order, and the number of
+: What player N's buttons press **in the game**, as Flash key codes. Slots go 0 to 7, in order, and the number of
   slots is how many players the game can have. Slot 0 is the host.
 
 `local:`
@@ -77,14 +77,14 @@ cursors: auto
 | `mouse: buttons` | Friends' mice too, but only on things the game made clickable (what shows the hand cursor) |
 | `mouse: zones` | A friend's mouse only on clickable things inside their own zone; the host's everywhere else |
 | `mouse: all` | Everyone's mouse, anywhere |
-| `mouse N: <mode>` | The same for one friend (N is 1 to 3), over what `mouse:` says. Next release |
+| `mouse N: <mode>` | The same for one friend (N is 1 to 7), over what `mouse:` says. Since 1.0.4 |
 | `zone N: <clip>` | The buttons inside that clip belong to player N, for example their card on a character screen. Only while the clip is on show |
 | `private: <clip> opened-by <pattern>` | A pop-up belongs to the player who opened it: only they see and click it. While it's someone's, nobody else may click the buttons that open it |
 | `hover: own`, `shared` | How each screen draws the game's buttons: by its own player's mouse (the default) or as the game has them. See [`coop.hover`](../api/mouse.md#how-buttons-look) |
-| `cursors: auto`, `on`, `off` | When friends' cursors show. Next release |
+| `cursors: auto`, `on`, `off` | When friends' cursors show. Since 1.0.4 |
 
 :::{dropdown} In 1.0.3.9
-`hover:` took `host` (the default), `own` or `off`, and there was no `mouse N:` or `cursors:`. In the next release
+`hover:` took `host` (the default), `own` or `off`, and there was no `mouse N:` or `cursors:`. Since 1.0.4
 `hover: host` means `shared`, and `hover: off` is gone.
 :::
 

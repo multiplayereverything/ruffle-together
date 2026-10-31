@@ -2,7 +2,7 @@
 
 | Call | Kind | Answer |
 |---|---|---|
-| `coop.players` | shared | The number of players, 2 to 4 |
+| `coop.players` | shared | The number of players, 2 to 8 |
 | `coop.name(slot)` | shared | That player's name (what they joined with) |
 | `coop.localSlot` | **local** | This PC's slot |
 | `coop.isHost` | **local** | `true` on the host's PC |
@@ -15,7 +15,7 @@
 `players`, `mouse`, `name`, `camera`, `hud`, `label`, `keys`, `buttons`, `typed`, `options`, `ping`, `events`,
 `chat`, `clicks`, `zones`, `private`, `hover`
 
-Next release: `pointers` (one mouse per player), `clicker`, `hovered`, `cursors`.
+Since 1.0.4: `pointers` (one mouse per player), `clicker`, `hovered`, `cursors`.
 
 Check a feature before using it, so the game still runs on an older Ruffle Together:
 
@@ -23,7 +23,7 @@ Check a feature before using it, so the game still runs on an older Ruffle Toget
 if (Coop.room.has("clicker")) {
     ready[Coop.mouse.clicker()] = true;   // whoever clicked
 } else {
-    ready[0] = true;                      // 1.0.3.9: only the host clicks
+    ready[0] = true;                      // before 1.0.4: only the host clicks
 }
 ```
 

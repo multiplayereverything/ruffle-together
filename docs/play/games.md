@@ -16,7 +16,7 @@ These games have a key map built in. Start them with `--coop-keys <name>` (the l
 | Intrusion 2 | 2 to 4 | `intrusion-2` |
 | Air Battle | 2 to 4 | `air-battle` |
 | Ultimate Crab Battle | 2 to 4 | `ultimate-crab-battle` |
-| Chaos Faction 2 | 2 | `chaos-faction-2` (each player picks their own character card) |
+| Chaos Faction 2 | 2 to 6 (3 to 6 need its 6-player SWF) | `chaos-faction-2` (each player picks their own character card) |
 
 Some of these are co-op mods of single-player games: use the mod's SWF, not the original.
 

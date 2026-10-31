@@ -27,7 +27,7 @@ yours included. That small wait is the **input delay**.
 - The host measures the ping when friends connect and picks the smallest delay that runs smoothly: about one
   frame per 67 ms of ping, and 1 frame on a LAN.
 - Everyone gets the same delay, so nobody has an advantage.
-- With 3 or 4 players, friends' inputs go through the host, so the two worst pings count together.
+- With 3 or more players, friends' inputs go through the host, so the two worst pings count together.
 - If an input is late, the game waits for it instead of guessing. That is why the slowest connection sets the
   pace for everyone.
 

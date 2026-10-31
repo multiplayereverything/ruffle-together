@@ -7,8 +7,8 @@
 | `coop.mouseX(slot)`, `coop.mouseY(slot)` | shared | That player's mouse in stage pixels. Each PC's cursor goes through its own camera, so these are game coordinates. (0, 0) until it moves |
 | `coop.mouseDown(slot)` | shared | `true` while that player's left button is down |
 | `coop.clicked(slot)` | shared | `true` on the frame that player pressed their left button, whether or not the click reached the game |
-| `coop.mouse.clicker` | shared | Inside a mouse handler (`CLICK`, `onRelease`...), the slot whose mouse caused it; `undefined` elsewhere. Next release |
-| `coop.mouse.hovered(slot)` | shared | The path of what that player's mouse is on (`"_root.menu.sword"`), as of the last frame; `undefined` while on nothing clickable. Next release |
+| `coop.mouse.clicker` | shared | Inside a mouse handler (`CLICK`, `onRelease`...), the slot whose mouse caused it; `undefined` elsewhere. Since 1.0.4 |
+| `coop.mouse.hovered(slot)` | shared | The path of what that player's mouse is on (`"_root.menu.sword"`), as of the last frame; `undefined` while on nothing clickable. Since 1.0.4 |
 | `coop.typed(slot)` | shared | What that player typed this frame: `"\b"` for Backspace, `"\n"` for Enter. Calling it tells Ruffle Together the game wants every typed character for the next 60 frames |
 | `coop.keys(text)` | shared | Sets the game's own key map, in the [`.keys` format](../make/key-maps.md). Used from the next frame on every PC; held keys are let go first; the same map again changes nothing. `true` if it parsed |
 
@@ -42,7 +42,7 @@ In the library these are `Coop.input.buttons`, `held`, `typed`, `setKeys` and `C
 Outside mouse handlers, `_xmouse`, `_ymouse`, `stage.mouseX` and `stage.mouseY` follow the **host's** mouse on every
 PC. A game where every player aims with the mouse reads each slot through the API, slot 0 included.
 
-From the next release every player has their own mouse in the game where the rules allow it: inside a handler,
+Since 1.0.4 every player has their own mouse in the game where the rules allow it: inside a handler,
 `stage.mouseX` / `_xmouse` is the mouse that caused it, and `coop.mouse.clicker` says whose it was. See
 [The mouse](mouse.md).
 

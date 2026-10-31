@@ -1,9 +1,9 @@
 # The mouse
 
-:::{admonition} Next release
+:::{admonition} Since 1.0.4
 :class: tip
 
-This page describes **one mouse per player**, which comes in the release after 1.0.3.9. What 1.0.3.9 does instead
+This page describes **one mouse per player**, new in 1.0.4. What 1.0.3.9 did instead
 is in the fold-outs marked "In 1.0.3.9".
 :::
 
@@ -34,7 +34,7 @@ together waited in a queue and followed one a frame. There was no `coop.mouse.cl
 | Call | Kind | Effect |
 |---|---|---|
 | `coop.mouse(mode)` | shared | Where every friend's mouse is in the game (below). Resets `coop.mouse(slot, mode)` |
-| `coop.mouse(slot, mode)` | shared | The same for one friend (slot 1 to 3), over what `coop.mouse(mode)` says: `coop.mouse(2, "host")` keeps player 3 out |
+| `coop.mouse(slot, mode)` | shared | The same for one friend (slot 1 to 7), over what `coop.mouse(mode)` says: `coop.mouse(2, "host")` keeps player 3 out |
 | `coop.zone(slot, path)` | shared | The buttons inside the clip at `path` (`"_root.players.p2"`) belong to that player, such as their own card on a character screen. Nobody else's mouse may click them, the host's included. Only while that clip is on show, so other screens are untouched. When zones nest, the most exact clip wins |
 | `coop.zone(slot, x, y, w, h)` | shared | The same for a box in stage pixels. A box applies on every screen, so prefer a clip |
 | `coop.zone(slot)` | shared | Clears that player's zones |
@@ -112,8 +112,8 @@ A cursor that hasn't moved for 3 seconds fades out.
 
 :::{dropdown} In 1.0.3.9
 `coop.hover` took `"host"` (the default: the game's own hover followed the host's mouse), `"own"` (the same, plus
-each PC drew Button symbols by its own player's mouse) and `"off"` (no hover at all). `"off"` is gone in the next
-release.
+each PC drew Button symbols by its own player's mouse) and `"off"` (no hover at all). `"off"` is gone since
+1.0.4.
 :::
 
 ## Private screens
@@ -141,7 +141,7 @@ everyone, and `BitmapData.draw` of the stage still sees the pop-up on every PC.
 Turn friends' mice on (`mouse: buttons`) and click the button once. The log
 (`%LOCALAPPDATA%\ruffle\log\ruffle.log`) says, for example, `player 2 clicks _root.players.p2.b10 (463, 272)`.
 
-The mouse debug overlay, `--coop-mouse-debug` (next release), shows every player's mouse, what it is on, and
+The mouse debug overlay, `--coop-mouse-debug` (since 1.0.4), shows every player's mouse, what it is on, and
 whether the rules let it be there.
 
 ## Example: a character screen

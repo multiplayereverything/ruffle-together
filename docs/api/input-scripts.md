@@ -14,7 +14,7 @@ line:
 | `press 100 50 2` | Player 2's mouse moves there and holds its button. No frame passes, so several players can press in the same frame |
 | `release 2` | Player 2 lets go. No frame passes |
 
-Slots are 0 to 3; the host is 0. Leaving out the slot of a mouse line means the host.
+Slots are 0 to 7; the host is 0. Leaving out the slot of a mouse line means the host.
 
 ```text
 # both players walk right, player 2 jumps, then player 2 clicks Start

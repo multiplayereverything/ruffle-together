@@ -61,11 +61,11 @@ if (Coop.active()) {
 }
 ```
 
-:::{admonition} Next release
+:::{admonition} Since 1.0.4
 :class: tip
 
-The `Coop` library comes with the release after 1.0.3.9. The calls it makes for features 1.0.3.9 already has work
-there too; `clicker`, `hovered`, `setModeFor` and `setCursors` need the next release.
+The `Coop` library comes with 1.0.4. Its calls for features 1.0.3.9 already had work there too; `clicker`,
+`hovered`, `setModeFor` and `setCursors` need 1.0.4.
 :::
 
 :::{dropdown} The older `RuffleTogether.as`

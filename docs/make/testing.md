@@ -44,7 +44,7 @@ From a checkout of the [`coop` branch](https://github.com/multiplayereverything/
 
 | Tool | What it does |
 |---|---|
-| `tools/coop-lab/lab.py --swf Game.swf --players 4 --keys my-game.keys` | 2 to 4 headless players on one PC, through a local relay with fake lag, and directly |
+| `tools/coop-lab/lab.py --swf Game.swf --players 4 --keys my-game.keys` | 2 to 8 headless players on one PC, through a local relay with fake lag, and directly |
 | `tools/coop-lab/windows_lab.py --swf Game.swf` | Two real windows; checks that every frame reaches the screen |
 
 To run several windows on one PC yourself, give each its own `--cache-directory`.

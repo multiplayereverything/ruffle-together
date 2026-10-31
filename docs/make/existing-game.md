@@ -127,7 +127,7 @@ scripts also fail on `SEVERE`, `Exception` or `error` in its output.
 
 ## 5. Test it
 
-Test it the same way as any co-op game: replays that give the same result twice, then two to four players through the
+Test it the same way as any co-op game: replays that give the same result twice, then two to eight players through the
 relay, then real windows. See {doc}`testing`. If the window title ever says OUT OF SYNC, the report says what differs;
 the usual cause is a local answer (`localSlot`, `isHost`) reaching gameplay. See {doc}`tips`.
 

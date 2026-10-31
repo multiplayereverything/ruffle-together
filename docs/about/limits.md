@@ -1,6 +1,6 @@
 # Limits
 
-- **Up to 4 players**, and nobody can join a game that has already started.
+- **Up to 8 players** (as many as the game has), and nobody can join a game that has already started.
 - **The game runs at the speed of the slowest PC** and the slowest connection.
 - **If the host leaves, the game ends.** A friend leaving doesn't end it.
 - **Only the keys in the key map reach the game.** P, M and the like don't, unless the map names them. `/` opens the

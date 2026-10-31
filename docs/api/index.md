@@ -58,7 +58,7 @@ makes the PCs' games split, and the window title says OUT OF SYNC.
 | `coop.hud`, `coop.label` | picture only | `Coop.view` | [Camera, HUD, labels](picture.md) |
 | `coop.version`, `coop.has`, `coop.option`, `coop.options`, `coop.events` | shared | `Coop.room` | [Players](players.md), [Host settings](host-settings.md), [Events](events.md) |
 
-`coop.mouse.clicker`, `coop.mouse.hovered`, `coop.mouse(slot, mode)` and `coop.mouse.cursors` are new in the next
-release (after 1.0.3.9).
+`coop.mouse.clicker`, `coop.mouse.hovered`, `coop.mouse(slot, mode)` and `coop.mouse.cursors` are new in
+1.0.4.
 
 Many features need no call at all: see [What every game gets](automatic.md).
