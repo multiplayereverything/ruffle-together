@@ -44,8 +44,8 @@ pub fn button_named(name: &str) -> Option<u16> {
     })
 }
 
-/// Up to 4 players (v1 plays 2).
-pub const MAX_PLAYERS: usize = 4;
+/// Up to 8 players; each game's key map says how many it takes (most take 2 or 4).
+pub const MAX_PLAYERS: usize = 8;
 
 /// One player's input for one frame.
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]

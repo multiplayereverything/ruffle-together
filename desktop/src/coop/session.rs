@@ -1347,6 +1347,7 @@ impl Drop for Session {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::coop::lockstep::MAX_PLAYERS;
     use crate::coop::replay::headless_player;
     use ruffle_core::external::Value;
     use std::net::TcpListener;
@@ -1887,7 +1888,7 @@ mod tests {
         for (state, session) in &all {
             assert_eq!(state.desync_at, None);
             let api = session.stepper.api().lock().expect("api").clone();
-            assert_eq!(api.mouse, expected, "player {}", session.local_index + 1);
+            assert_eq!(api.mouse[..4], expected, "player {}", session.local_index + 1);
             assert_eq!(api.local_slot, session.local_index);
         }
     }
@@ -2008,6 +2009,45 @@ mod tests {
         let mut slots: Vec<u8> = all.iter().map(|(_, s)| s.local_index).collect();
         slots.sort();
         assert_eq!(slots, vec![0, 1, 2, 3], "each PC its own player slot");
+        let host_prints = &all[0].1.my_prints;
+        assert!(host_prints.len() >= 10, "sync checks ran");
+        for (state, session) in &all {
+            assert_eq!(state.desync_at, None);
+            assert_eq!(state.closed, None);
+            assert_eq!(&session.my_prints, host_prints, "player {}", session.local_index + 1);
+        }
+    }
+
+    /// The most players Ruffle Together takes: 8 PCs, each its own slot, the same frames.
+    #[test]
+    fn eight_players_stay_in_sync() {
+        let Some(swf) = test_swf() else { return };
+        let port = free_port();
+        let keys: String = (0..MAX_PLAYERS).map(|slot| format!("slot {slot}: FIRE={}
+", 65 + slot)).collect();
+        let game = Game::parse("eight", &keys).expect("8 slots");
+        assert_eq!(game.max_players() as usize, MAX_PLAYERS);
+        let eight = move |mut o: SessionOpts| {
+            o.players = MAX_PLAYERS as u8;
+            o.game = game.clone();
+            o
+        };
+        let host_swf = swf.clone();
+        let host_opts = eight(opts(Role::HostDirect { port }, &host_swf, 0));
+        let host = thread::spawn(move || play(host_opts, 300, None));
+        thread::sleep(Duration::from_millis(300));
+        let friends: Vec<_> = (1..MAX_PLAYERS)
+            .map(|_| {
+                thread::sleep(Duration::from_millis(100));
+                let o = eight(opts(Role::JoinDirect { addr: format!("127.0.0.1:{port}") }, &swf, 0));
+                thread::spawn(move || play(o, 300, None))
+            })
+            .collect();
+        let mut all = vec![host.join().expect("host")];
+        all.extend(friends.into_iter().map(|f| f.join().expect("friend")));
+        let mut slots: Vec<u8> = all.iter().map(|(_, s)| s.local_index).collect();
+        slots.sort();
+        assert_eq!(slots, (0..MAX_PLAYERS as u8).collect::<Vec<_>>(), "each PC its own player slot");
         let host_prints = &all[0].1.my_prints;
         assert!(host_prints.len() >= 10, "sync checks ran");
         for (state, session) in &all {

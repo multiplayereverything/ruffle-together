@@ -2,7 +2,7 @@
 //!
 //! ```text
 //! ExternalInterface.call("coop.players")         number of players (2-4)
-//! ExternalInterface.call("coop.localSlot")       this PC's player slot (0-3): camera, HUD, "you" labels ONLY
+//! ExternalInterface.call("coop.localSlot")       this PC's player slot (0-7): camera, HUD, "you" labels ONLY
 //! ExternalInterface.call("coop.mouseX", slot)    that slot's mouse, stage pixels (same space as _root._xmouse)
 //! ExternalInterface.call("coop.mouseY", slot)
 //! ExternalInterface.call("coop.mouseDown", slot) that slot's left button
@@ -562,7 +562,8 @@ mod tests {
     #[test]
     fn pings_per_slot() {
         let mut api = CoopApi::new(3, 1);
-        api.pings = [Some(80), Some(0), None, None];
+        api.pings = [None; MAX_PLAYERS];
+        api.pings[..2].copy_from_slice(&[Some(80), Some(0)]);
         assert_eq!(api.answer("coop.ping", &[n(0.0)]), n(80.0));
         assert_eq!(api.answer("coop.ping", &[n(1.0)]), n(0.0));
         assert_eq!(api.answer("coop.ping", &[n(2.0)]), Value::Undefined, "not measured yet");

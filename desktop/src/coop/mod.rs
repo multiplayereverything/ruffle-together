@@ -127,7 +127,7 @@ pub struct CoopOpt {
     #[clap(long, help_heading = "Ruffle Together")]
     pub coop_delay: Option<u32>,
 
-    /// Host: how many players the game starts with, 2 to 4 (as many as the game has keys for);
+    /// Host: how many players the game starts with, 2 to 8 (as many as the game has keys for);
     /// it starts once all have joined.
     #[clap(long, default_value_t = 2, help_heading = "Ruffle Together")]
     pub coop_players: u8,

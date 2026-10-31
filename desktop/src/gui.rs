@@ -232,11 +232,15 @@ fn show_labels(
 }
 
 /// Ruffle Together: each player's colour for cursors and the mouse debug overlay.
-const PLAYER_COLOURS: [Color32; 4] = [
+const PLAYER_COLOURS: [Color32; crate::coop::lockstep::MAX_PLAYERS] = [
     Color32::from_rgb(224, 64, 64),
     Color32::from_rgb(48, 112, 240),
     Color32::from_rgb(48, 176, 80),
     Color32::from_rgb(224, 160, 32),
+    Color32::from_rgb(160, 80, 224),
+    Color32::from_rgb(32, 192, 200),
+    Color32::from_rgb(232, 96, 176),
+    Color32::from_rgb(150, 110, 60),
 ];
 
 /// Ruffle Together: the other players' mice, an arrow in their colour with their name (the

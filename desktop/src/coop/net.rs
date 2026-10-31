@@ -3,6 +3,7 @@
 //! TCP with Nagle off. The host is player 0 and passes each friend's lines on to the other
 //! friends, so more than 2 players work the same way.
 
+use crate::coop::lockstep::MAX_PLAYERS;
 use crate::coop::protocol::{Msg, decode, encode};
 use std::io::{self, BufRead, BufReader, Write};
 use std::net::{Shutdown, TcpListener, TcpStream};
@@ -172,8 +173,9 @@ pub fn connect(role: Role, version: &str, name: &str) -> io::Result<Link> {
         Role::HostRelay { relay } => {
             let (stream, mut reader) = relay_handshake(
                 &relay,
-                // unlisted room, up to 4 players, no password, no handoff
-                &format!("RELAY|2|HOST|{GAME_ID}|{version}|0|4|||{}", clean_name(name)),
+                // unlisted room, up to MAX_PLAYERS (the relay caps it at mods-info's max_players), no
+                // password, no handoff
+                &format!("RELAY|2|HOST|{GAME_ID}|{version}|0|{MAX_PLAYERS}|||{}", clean_name(name)),
             )?;
             let mut room = None;
             loop {
@@ -422,7 +424,7 @@ mod tests {
         let games = dir.join("games.json");
         std::fs::write(
             &games,
-            r#"{"ruffle-coop": {"name": "Ruffle Together", "mode": "star", "max_players": 4}}"#,
+            r#"{"ruffle-coop": {"name": "Ruffle Together", "mode": "star", "max_players": 8}}"#,
         )
         .expect("games.json");
         let port = free_port();

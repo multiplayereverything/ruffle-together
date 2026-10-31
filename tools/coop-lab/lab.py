@@ -61,7 +61,7 @@ def run(args, mode):
     try:
         if mode == "relay":
             games = os.path.join(tempfile.mkdtemp(), "games.json")
-            json.dump({"ruffle-coop": {"name": "Ruffle Together", "mode": "star", "max_players": 4}}, open(games, "w"))
+            json.dump({"ruffle-coop": {"name": "Ruffle Together", "mode": "star", "max_players": 8}}, open(games, "w"))
             port = free_port()
             relay = subprocess.Popen([sys.executable, RELAY, "--port", str(port), "--no-mods-info", "--no-discord",
                                       "--games", games, "--sim-delay", str(args.lag), "--sim-jitter", str(args.jitter)],
