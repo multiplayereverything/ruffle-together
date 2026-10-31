@@ -589,6 +589,18 @@ mod tests {
         assert_eq!(stepper.api().lock().expect("api").privates[0].owner, None, "closed by its owner");
     }
 
+    /// 8 players: players 2-8 each click their own spot at once, each with their own mouse; the host's
+    /// mouse stays where it was.
+    #[test]
+    fn eight_players_click_at_once() {
+        let host = at(10, 10, false);
+        let all = |down: bool| -> Mice { std::iter::once(host).chain((1..8).map(|slot| at(290 + 5 * slot, 250, down))).collect() };
+        let (traces, _, player) = run_mice("clicks/Clicks.swf", "mouse: all", 8, 0, &[all(true), all(false)]);
+        let expected: Vec<String> = (1..8).map(|slot| format!("down {},250", 290 + 5 * slot)).collect();
+        assert_eq!(traces, expected);
+        assert_eq!(player.lock().expect("player").mouse_position_twips(), (200, 200), "the host's mouse didn't move");
+    }
+
     /// `hover: own`: player 2's mouse on the SimpleButton makes the game's button Over (red) on
     /// every PC, but each PC draws it as its own player's mouse sees it: the host's PC in Up art
     /// (blue), player 2's in Over art. `hover: shared` draws the game's state everywhere. The game

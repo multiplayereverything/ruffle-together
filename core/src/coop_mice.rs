@@ -8,8 +8,8 @@ use crate::display_object::{InteractiveObject, TInteractiveObject};
 use crate::prelude::*;
 use gc_arena::Collect;
 
-/// The most players a session has.
-pub const MAX_POINTERS: usize = 4;
+/// The most players a session has (the desktop's `MAX_PLAYERS`, which checks they match).
+pub const MAX_POINTERS: usize = 8;
 
 /// One player's mouse while it isn't Ruffle's own.
 #[derive(Clone, Copy, Collect)]

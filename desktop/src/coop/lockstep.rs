@@ -46,6 +46,8 @@ pub fn button_named(name: &str) -> Option<u16> {
 
 /// Up to 8 players; each game's key map says how many it takes (most take 2 or 4).
 pub const MAX_PLAYERS: usize = 8;
+// every player needs a mouse of their own in core
+const _: () = assert!(MAX_PLAYERS == ruffle_core::coop_mice::MAX_POINTERS);
 
 /// One player's input for one frame.
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]

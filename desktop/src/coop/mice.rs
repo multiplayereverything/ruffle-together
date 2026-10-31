@@ -102,6 +102,8 @@ impl Mice {
             let on = rules.modes[slot] != MouseMode::Host;
             if on != self.on[slot] {
                 player.coop_set_pointer(slot as u8, on);
+                // a slot core has no mouse for stays off: feeding it would move the host's mouse
+                let on = on && player.coop_has_pointer(slot as u8);
                 (self.on[slot], self.inside[slot], self.down[slot]) = (on, false, false);
             }
         }
