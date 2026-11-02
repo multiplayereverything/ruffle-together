@@ -386,11 +386,15 @@ fn show_lobby(ui: &mut Ui, lobby: &crate::coop::Lobby) {
                 ui.label(RichText::new("Can't start the game").size(big(20.0)).strong());
                 ui.label(error);
                 ui.add_space(big(8.0));
-                ui.label(tv_hint.as_deref().unwrap_or("Close this window and try again."));
+                match &tv_hint {
+                    Some(hint) => ui.label(RichText::new(hint).size(big(18.0))),
+                    None => ui.label("Close this window and try again."),
+                };
                 return;
             }
+            // the line a player on the sofa needs most: as big as "Waiting for players"
             if let Some(hint) = &tv_hint {
-                ui.label(RichText::new(hint).small());
+                ui.label(RichText::new(hint).size(big(18.0)));
                 ui.add_space(big(8.0));
             }
             if !lobby.connected {
