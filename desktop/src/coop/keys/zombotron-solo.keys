@@ -1,0 +1,4 @@
+# Zombotron on its own (Play solo in TV mode): the game's keys, as its mod's slot 0 (src/zcoop/ZCoop.as).
+# WASD move, Space (YES) starts, R ALT, Q KEY1, H KEY2, B KEY3, P pause. Aim and shoot with the mouse.
+slot 0: UP=87 DOWN=83 LEFT=65 RIGHT=68 YES=32 ALT=82 KEY1=81 KEY2=72 KEY3=66 MENU=80
+local: UP=87,38 DOWN=83,40 LEFT=65,37 RIGHT=68,39 YES=32 ALT=82 KEY1=81 KEY2=72 KEY3=66 MENU=80

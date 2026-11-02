@@ -1,0 +1,4 @@
+# Intrusion 2 on its own (Play solo in TV mode): the game's keys, as its mod's slot 0 (src/i2net/Coop.as).
+# WASD move, Space fire, E action, Q and F weapons, P pause.
+slot 0: UP=87 DOWN=83 LEFT=65 RIGHT=68 FIRE=32 ALT=69 KEY1=81 KEY2=70 QUIT=80
+local: UP=87,38 DOWN=83,40 LEFT=65,37 RIGHT=68,39 FIRE=32 ALT=69 KEY1=81 KEY2=70 QUIT=80

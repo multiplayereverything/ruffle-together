@@ -1,0 +1,4 @@
+# Dad 'n Me on its own (Play solo in TV mode): the game's keys, as its mod's slot 0 (src/keys.as).
+# Arrows move, A punch, S second punch.
+slot 0: UP=38 DOWN=40 LEFT=37 RIGHT=39 FIRE=65 ALT=83
+local: UP=38 DOWN=40 LEFT=37 RIGHT=39 FIRE=65 ALT=83

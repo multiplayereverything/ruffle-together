@@ -1,0 +1,4 @@
+# Intrusion on its own (Play solo in TV mode): the game's keys, as its mod's slot 0 (src/local/lcore.as).
+# Arrows move, Space fire, X ALT, C VIEW, 1-4 weapons, P QUIT.
+slot 0: UP=38 DOWN=40 LEFT=37 RIGHT=39 FIRE=32 ALT=88 VIEW=67 KEY1=49 KEY2=50 KEY3=51 KEY4=52 QUIT=80
+local: UP=38 DOWN=40 LEFT=37 RIGHT=39 FIRE=32 ALT=88 VIEW=67 KEY1=49 KEY2=50 KEY3=51 KEY4=52 QUIT=80

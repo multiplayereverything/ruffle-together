@@ -45,6 +45,13 @@ const BUILT_IN: &[(&str, &str)] = &[
     ("fireboy-watergirl", include_str!("keys/fireboy-watergirl.keys")),
     ("chaos-faction-2", include_str!("keys/chaos-faction-2.keys")),
     ("controller", include_str!("keys/controller.keys")),
+    // TV mode's Play solo for games whose mod gives its keys only in a session (coop.keys): one slot,
+    // the game's own keys (`--coop-keys NAME-solo` from the launcher)
+    ("dad-n-me-solo", include_str!("keys/dad-n-me-solo.keys")),
+    ("hobo-solo", include_str!("keys/hobo-solo.keys")),
+    ("zombotron-solo", include_str!("keys/zombotron-solo.keys")),
+    ("intrusion-solo", include_str!("keys/intrusion-solo.keys")),
+    ("intrusion-2-solo", include_str!("keys/intrusion-2-solo.keys")),
 ];
 
 /// A game's key map (`--coop-keys`).
@@ -934,6 +941,19 @@ local: FIRE=27").expect("map");
 
     /// Chaos Faction 2: every player presses the game's solo keys on their own PC; P1 sends them as they are, P2
     /// as numpad codes the mod maps to player 2. Only P1 pauses.
+    /// TV mode's Play solo: a controller's FIRE and ALT punch with Dad 'n Me's own A and S, not the
+    /// generic map's Z and X.
+    #[test]
+    fn solo_maps_press_the_games_own_keys() {
+        let mut dnm = game("dad-n-me-solo").keys();
+        assert_eq!(down_keys(&dnm.events(0, FIRE)), vec![PhysicalKey::KeyA]);
+        assert_eq!(down_keys(&dnm.events(0, FIRE | ALT)), vec![PhysicalKey::KeyS]);
+        assert_eq!(down_keys(&game("controller").keys().events(0, FIRE)), vec![PhysicalKey::KeyZ]);
+        for name in ["hobo-solo", "zombotron-solo", "intrusion-solo", "intrusion-2-solo"] {
+            assert_eq!(game(name).max_players(), 1, "{name}");
+        }
+    }
+
     #[test]
     fn chaos_faction_2_keys() {
         let cf = game("chaos-faction-2");
