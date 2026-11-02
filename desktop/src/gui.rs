@@ -378,10 +378,8 @@ fn show_lobby(ui: &mut Ui, lobby: &crate::coop::Lobby) {
             ui.add_space(ui.available_height() * 0.2);
             ui.heading("Ruffle Together");
             ui.add_space(big(16.0));
-            // TV mode: no keyboard, so the controller's way out
-            let tv_hint = crate::coop::tv::tv().map(|tv| {
-                format!("Hold {} to leave", tv.kind().label(crate::coop::tv::Pad::Start))
-            });
+            // TV mode: the way out for how this player plays (controller, keyboard, or both)
+            let tv_hint = crate::coop::tv::tv().map(|tv| tv.leave_hint());
             if let Some(error) = &lobby.error {
                 ui.label(RichText::new("Can't start the game").size(big(20.0)).strong());
                 ui.label(error);

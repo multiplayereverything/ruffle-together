@@ -181,6 +181,9 @@ pub struct Tv {
     last_update: Option<Instant>,
     actions: Vec<Action>,
     script: Option<PadScript>,
+    /// What this player used last, for the hints: Some(true) the controller, Some(false) the
+    /// keyboard or mouse.
+    used_pad: Option<bool>,
 }
 
 impl Tv {
@@ -202,6 +205,33 @@ impl Tv {
             last_update: None,
             actions: vec![],
             script: None,
+            used_pad: None,
+        }
+    }
+
+    /// The keyboard was used: hints name it from now on.
+    pub fn keys_used(&mut self) {
+        self.used_pad = Some(false);
+    }
+
+    /// The real mouse moved (window pixels): the right stick carries on from there, and the
+    /// stick's arrow goes away so it never sits apart from the real cursor.
+    pub fn mouse_moved(&mut self, x: f64, y: f64) {
+        if !self.clicking {
+            self.pointer = Some((x, y));
+            self.pointer_used = None;
+            self.used_pad = Some(false);
+        }
+    }
+
+    /// How to leave, for the way this player plays: the controller's TV menu, the keyboard's
+    /// Alt+F4 (closing the window), or both until one is used.
+    pub fn leave_hint(&self) -> String {
+        let start = self.kind.label(Pad::Start);
+        match self.used_pad {
+            Some(true) => format!("Hold {start} to leave"),
+            Some(false) => "Press Alt+F4 to leave".into(),
+            None => format!("Hold {start} or press Alt+F4 to leave"),
         }
     }
 
@@ -243,6 +273,7 @@ impl Tv {
             return;
         }
         if down {
+            self.used_pad = Some(true);
             self.held.insert(pad);
         } else {
             self.held.remove(&pad);
@@ -278,6 +309,9 @@ impl Tv {
 
     pub fn stick(&mut self, stick: Stick, value: f32) {
         self.sticks[stick as usize] = if self.focused { value } else { 0.0 };
+        if self.focused && value.abs() > STICK {
+            self.used_pad = Some(true);
+        }
     }
 
     pub fn focus(&mut self, focused: bool) {
@@ -635,6 +669,33 @@ mod tests {
         tv.stick(Stick::LeftX, 1.0);
         tv.focus(true);
         assert_eq!(tv.buttons(now, 0), 0, "presses made while another window was in front don't count");
+    }
+
+    /// TV mode is the big screen, not controller only: the keyboard and mouse keep working, and
+    /// the hints follow what the player used last.
+    #[test]
+    fn keyboard_and_mouse_players() {
+        let t0 = Instant::now();
+        let mut tv = Tv::new(None);
+        assert_eq!(tv.leave_hint(), "Hold Menu or press Alt+F4 to leave");
+        tv.keys_used();
+        assert_eq!(tv.leave_hint(), "Press Alt+F4 to leave");
+        tv.button(Pad::A, true, t0);
+        assert_eq!(tv.leave_hint(), "Hold Menu to leave");
+        tv.button(Pad::A, false, t0);
+        tv.update(t0, WINDOW, 0);
+        tv.stick(Stick::RightX, 1.0);
+        tv.update(t0 + ms(100), WINDOW, 0);
+        assert!(tv.pointer(t0 + ms(100)).is_some(), "the stick's arrow");
+        tv.mouse_moved(100.0, 50.0);
+        assert_eq!(tv.pointer(t0 + ms(100)), None, "the real cursor moved: no arrow apart from it");
+        assert_eq!(tv.leave_hint(), "Press Alt+F4 to leave");
+        tv.take_actions();
+        tv.update(t0 + ms(200), WINDOW, 0);
+        let Some(Action::MouseMove { x, y }) = tv.take_actions().first().copied() else {
+            panic!("the stick moves on");
+        };
+        assert_eq!((x, y), (100.0 + 80.0, 50.0), "from where the real mouse is");
     }
 
     #[test]

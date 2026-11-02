@@ -129,6 +129,10 @@ impl MainWindow {
                 }
 
                 self.mouse_pos = position;
+                // TV mode: the right stick carries on from the real mouse
+                if let Some(mut tv) = crate::coop::tv::tv() {
+                    tv.mouse_moved(position.x, position.y);
+                }
 
                 // We can't handle mouse move here, doing so would put Ruffle in
                 // a busy loop processing every queued CursorMoved event. Flash
@@ -229,6 +233,13 @@ impl MainWindow {
             WindowEvent::KeyboardInput { event, .. } => {
                 if self.gui.is_context_menu_visible() {
                     return;
+                }
+
+                // TV mode: hints name the keyboard while it's in use
+                if event.state == ElementState::Pressed
+                    && let Some(mut tv) = crate::coop::tv::tv()
+                {
+                    tv.keys_used();
                 }
 
                 // Handle escaping from fullscreen.
@@ -929,7 +940,10 @@ impl ApplicationHandler<RuffleEvent> for App {
                 }
             }
 
-            (Some(main_window), RuffleEvent::ExitFullScreen) if crate::coop::session().is_none() => {
+            // TV mode stays full screen (Esc is a game key; Alt+F4 leaves)
+            (Some(main_window), RuffleEvent::ExitFullScreen)
+                if crate::coop::session().is_none() && !crate::coop::tv::on() =>
+            {
                 if let Some(mut player) = main_window.player.get()
                     && player.is_playing()
                 {
