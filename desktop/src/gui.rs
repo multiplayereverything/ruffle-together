@@ -121,9 +121,13 @@ impl RuffleGui {
                     .anchor(Align2::CENTER_TOP, vec2(0.0, 40.0))
                     .order(Order::Foreground)
                     .show(egui_ctx, |ui| {
-                        Frame::popup(ui.style()).show(ui, |ui| ui.label(RichText::new(notice).size(16.0)));
+                        Frame::popup(ui.style()).show(ui, |ui| ui.label(RichText::new(notice).size(big(16.0))));
                     });
             }
+        }
+
+        if let Some(tv) = crate::coop::tv::tv() {
+            show_tv(egui_ctx, &tv);
         }
 
         if let Some(player) = player {
@@ -207,6 +211,48 @@ impl RuffleGui {
     }
 }
 
+/// Ruffle Together: a text size, bigger in TV mode.
+fn big(size: f32) -> f32 {
+    size * crate::coop::tv::text_scale()
+}
+
+/// Ruffle Together TV mode: this PC's mouse while the right stick moves it, and the TV menu (hold
+/// Start): Resume, Quit to launcher.
+fn show_tv(egui_ctx: &egui::Context, tv: &crate::coop::tv::Tv) {
+    use crate::coop::tv::{MENU_ITEMS, Pad};
+    let points = egui_ctx.pixels_per_point() as f64;
+    if let Some((x, y)) = tv.pointer(std::time::Instant::now()) {
+        let painter = egui_ctx.layer_painter(LayerId::new(Order::Foreground, Id::new("coop-tv-pointer")));
+        let at = pos2((x / points) as f32, (y / points) as f32);
+        let size = big(1.0);
+        let arrow = vec![at, at + vec2(0.0, 16.0) * size, at + vec2(4.5, 12.0) * size, at + vec2(11.0, 11.0) * size];
+        painter.add(egui::Shape::convex_polygon(arrow, Color32::WHITE, egui::Stroke::new(1.5, Color32::BLACK)));
+    }
+    let Some(selected) = tv.menu() else {
+        return;
+    };
+    let kind = tv.kind();
+    Area::new(Id::new("coop-tv-menu"))
+        .anchor(Align2::CENTER_CENTER, vec2(0.0, 0.0))
+        .order(Order::Foreground)
+        .interactable(false)
+        .show(egui_ctx, |ui| {
+            Frame::popup(ui.style()).inner_margin(big(16.0)).show(ui, |ui| {
+                ui.set_min_width(big(260.0));
+                ui.vertical_centered(|ui| {
+                    ui.heading("Ruffle Together");
+                    ui.add_space(big(8.0));
+                    for (i, item) in MENU_ITEMS.iter().enumerate() {
+                        let text = RichText::new(*item).size(big(18.0));
+                        ui.label(if i == selected { text.strong().background_color(ui.visuals().selection.bg_fill) } else { text });
+                    }
+                    ui.add_space(big(8.0));
+                    ui.label(RichText::new(format!("{} choose   {} back", kind.label(Pad::A), kind.label(Pad::B))).small());
+                });
+            });
+        });
+}
+
 /// Ruffle Together: the game's name tags (`coop.label`), above their clips as this PC's camera
 /// shows them. They are drawn over the game, never in it, so they can't change the game.
 fn show_labels(
@@ -225,7 +271,7 @@ fn show_labels(
             continue;
         };
         let at = pos2((x / points) as f32, ((y + menu_height_offset) / points) as f32 - 4.0);
-        let font = FontId::proportional(14.0);
+        let font = FontId::proportional(big(14.0));
         painter.text(at + vec2(1.0, 1.0), Align2::CENTER_BOTTOM, &label.text, font.clone(), Color32::BLACK);
         painter.text(at, Align2::CENTER_BOTTOM, &label.text, font, Color32::WHITE);
     }
@@ -259,7 +305,7 @@ fn show_cursors(egui_ctx: &egui::Context, player: &mut Player, cursors: &[crate:
         let size = if cursor.down { 1.3 } else { 1.0 };
         let arrow = vec![at, at + vec2(0.0, 16.0) * size, at + vec2(4.5, 12.0) * size, at + vec2(11.0, 11.0) * size];
         painter.add(egui::Shape::convex_polygon(arrow, colour, egui::Stroke::new(1.5, black)));
-        let font = FontId::proportional(12.0);
+        let font = FontId::proportional(big(12.0));
         let text_at = at + vec2(12.0, 14.0);
         painter.text(text_at + vec2(1.0, 1.0), Align2::LEFT_TOP, &cursor.name, font.clone(), black);
         painter.text(text_at, Align2::LEFT_TOP, &cursor.name, font, colour);
@@ -331,13 +377,21 @@ fn show_lobby(ui: &mut Ui, lobby: &crate::coop::Lobby) {
         ui.vertical_centered(|ui| {
             ui.add_space(ui.available_height() * 0.2);
             ui.heading("Ruffle Together");
-            ui.add_space(16.0);
+            ui.add_space(big(16.0));
+            // TV mode: no keyboard, so the controller's way out
+            let tv_hint = crate::coop::tv::tv().map(|tv| {
+                format!("Hold {} to leave", tv.kind().label(crate::coop::tv::Pad::Start))
+            });
             if let Some(error) = &lobby.error {
-                ui.label(RichText::new("Can't start the game").size(20.0).strong());
+                ui.label(RichText::new("Can't start the game").size(big(20.0)).strong());
                 ui.label(error);
-                ui.add_space(8.0);
-                ui.label("Close this window and try again.");
+                ui.add_space(big(8.0));
+                ui.label(tv_hint.as_deref().unwrap_or("Close this window and try again."));
                 return;
+            }
+            if let Some(hint) = &tv_hint {
+                ui.label(RichText::new(hint).small());
+                ui.add_space(big(8.0));
             }
             if !lobby.connected {
                 ui.label(if lobby.hosting { "Opening the room..." } else { "Connecting..." });
@@ -345,14 +399,14 @@ fn show_lobby(ui: &mut Ui, lobby: &crate::coop::Lobby) {
             }
             if let Some(code) = &lobby.room {
                 ui.label(if lobby.hosting { "Your room code" } else { "Room" });
-                ui.label(RichText::new(code).size(48.0).monospace().strong());
+                ui.label(RichText::new(code).size(big(48.0)).monospace().strong());
             } else if let Some(port) = lobby.port {
                 ui.label(format!("Hosting on port {port}: friends join with your IP address and this port."));
             }
             ui.add_space(16.0);
             if lobby.hosting {
                 let waiting = format!("Waiting for players: {} of {}", lobby.players.len(), lobby.needed);
-                ui.label(RichText::new(waiting).size(18.0));
+                ui.label(RichText::new(waiting).size(big(18.0)));
                 for (i, name) in lobby.players.iter().enumerate() {
                     ui.label(format!("Player {}: {name}", i + 1));
                 }
@@ -363,7 +417,7 @@ fn show_lobby(ui: &mut Ui, lobby: &crate::coop::Lobby) {
                     ui.label("The game starts when everyone has joined.");
                 }
             } else {
-                ui.label(RichText::new("Waiting for the host to start the game...").size(18.0));
+                ui.label(RichText::new("Waiting for the host to start the game...").size(big(18.0)));
                 if lobby.needed > 0 {
                     ui.add_space(8.0);
                     ui.label(format!("Players: {} of {}", lobby.players.len(), lobby.needed));

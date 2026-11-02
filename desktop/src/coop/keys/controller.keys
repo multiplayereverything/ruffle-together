@@ -1,0 +1,5 @@
+# TV mode without a session and without --coop-keys: one player, the keys most Flash games use.
+# A controller presses these (see src/coop/tv.rs): D-pad = arrows, A = Z, B = X, X = Space, Y = Enter,
+# RB = Shift, LB = C, View = Esc, Start (tapped) = P.
+slot 0: UP=38 DOWN=40 LEFT=37 RIGHT=39 FIRE=90 ALT=88 KEY1=32 KEY2=13 KEY3=16 KEY4=67 VIEW=27 MENU=80
+local: UP=38 DOWN=40 LEFT=37 RIGHT=39 FIRE=90 ALT=88 KEY1=32 KEY2=13 KEY3=16 KEY4=67 VIEW=27 MENU=80

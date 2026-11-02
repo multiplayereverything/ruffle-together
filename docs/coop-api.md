@@ -159,7 +159,7 @@ the sync check never see it. Paths are `_root` / `_level0` / `root` and then ins
 
 | Feature | What happens |
 |---|---|
-| **Key maps** | Each player's keys press that player's keys in the game (`--coop-keys NAME` or a `.keys` file; 13 built in) |
+| **Key maps** | Each player's keys press that player's keys in the game (`--coop-keys NAME` or a `.keys` file; 13 games built in, plus `controller` for TV mode without a session) |
 | **Typing** | What players type goes into the game's selected text box on every PC (names, chat), in player order, Backspace and Enter included. While no text box is selected, typed text only reaches `coop.typed`; instead each player's key press types its game key's character (from any key map, `coop.keys` included, and in scripts and replays), so `on(keyPress "1")` buttons work but stray keys can't trigger a game's shortcuts. A paste becomes the sender's clipboard text (64 characters at most); copy is ignored and cut deletes |
 | **Leaving** | A friend who leaves or drops out no longer stops the game: everyone else plays on and sees "Sam left". Losing the host still ends it |
 | **Private screens** | With `private: <clip>` in the key map, a pop-up only the player who opened it sees and clicks |
@@ -168,6 +168,7 @@ the sync check never see it. Paths are `_root` / `_level0` / `root` and then ins
 | **Same game everywhere** | Clock, `Date`, `Math.random`, timers, sound endings, script time limits and window size are the same on every PC |
 | **Save** | Everyone starts from the host's co-op save (`--coop-save coop\|solo\|new`), and every PC keeps the session's saves in its own co-op save, so anyone can host next time |
 | **Sync check** | Every 25 frames; the title says OUT OF SYNC and each PC writes a report of what differs |
+| **Controller (TV mode)** | With `RUFFLE_TOGETHER_TV=1` a controller presses the key map's buttons for this PC's player (D-pad UP/DOWN/LEFT/RIGHT, A FIRE, B ALT, X KEY1, Y KEY2, RB KEY3, LB KEY4, RT YES, LT NO, View VIEW, Menu tapped MENU, LS QUIT, right stick the mouse), so a game needs nothing of its own. Holding Menu opens Resume / Quit to launcher. See [the user guide](ruffle-together.md#tv-mode-a-controller-no-keyboard-or-mouse) |
 | **Discord** | "Ruffle Together: Playing GAME, room ABCDE (2 of 2)" on the profile of anyone who shares their activity. A Join button for relay rooms comes once the join page is set (see `desktop/src/coop/discord.rs`) |
 
 ## Join links
@@ -193,6 +194,9 @@ the button.
 | `--coop-replay SWF --coop-script FILE --coop-out FILE` | Test: run headless and write every frame's fingerprint |
 | `--coop-headless`, `--coop-frames N` | Test: a whole session without a window |
 | `--coop-mouse-debug` | Test: show every player's mouse, what it is on, and whether the rules let it be there |
+| `RUFFLE_TOGETHER_TV=1` (environment) | TV mode: full screen, a controller plays, big text (with `--fullscreen` for older builds) |
+| `RUFFLE_TOGETHER_PAD=xbox\|playstation\|nintendo` (environment) | TV mode: which controller's button names the hints use |
+| `--coop-pad-script FILE` | Test: TV mode in a window, with a controller played from a file |
 
 ## Demo
 

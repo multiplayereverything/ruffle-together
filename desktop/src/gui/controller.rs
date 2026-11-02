@@ -112,6 +112,15 @@ impl GuiController {
         );
         let descriptors = Descriptors::new(instance, adapter, device, queue);
         let egui_ctx = Context::default();
+        // Ruffle Together TV mode: text to read from a sofa
+        if crate::coop::tv::on() {
+            let scale = crate::coop::tv::text_scale();
+            egui_ctx.all_styles_mut(|style| {
+                for font in style.text_styles.values_mut() {
+                    font.size *= scale;
+                }
+            });
+        }
 
         let theme_controller = futures::executor::block_on(ThemeController::new(
             window.clone(),

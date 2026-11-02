@@ -52,6 +52,11 @@ struct MainWindow {
     coop_title: String,
     /// Ruffle Together: the window shows the waiting screen; the game loads once the session starts.
     coop_waiting: bool,
+    /// Ruffle Together TV mode without a session: the keys the controller presses (slot 0 of
+    /// `--coop-keys`, or the built-in `controller` map) and the buttons they have.
+    tv_keys: Option<(crate::coop::keymap::GameKeys, u16)>,
+    /// TV mode has read the name of the controller connected at start.
+    tv_pad_named: bool,
     event_loop_proxy: EventLoopProxy<RuffleEvent>,
 }
 
@@ -140,11 +145,12 @@ impl MainWindow {
                     );
                 }
             }
-            WindowEvent::Focused(true) => {
-                self.handle_player_event(PlayerEvent::FocusGained);
-            }
-            WindowEvent::Focused(false) => {
-                self.handle_player_event(PlayerEvent::FocusLost);
+            WindowEvent::Focused(focused) => {
+                // TV mode's controller counts only while this window is in front, like the keys
+                if let Some(mut tv) = crate::coop::tv::tv() {
+                    tv.focus(focused);
+                }
+                self.handle_player_event(if focused { PlayerEvent::FocusGained } else { PlayerEvent::FocusLost });
             }
             WindowEvent::MouseInput { button, state, .. } => {
                 if self.gui.is_context_menu_visible() {
@@ -368,10 +374,15 @@ impl MainWindow {
         }
     }
 
-    fn about_to_wait(&mut self, gilrs: Option<&mut Gilrs>) {
+    fn about_to_wait(&mut self, mut gilrs: Option<&mut Gilrs>) {
         // When we don't have any more pending events, flush any pending mouse
         // moves, so that they can get coalesced properly.
         self.flush_mouse_move();
+
+        let tv = crate::coop::tv::on();
+        if tv {
+            self.tv_input(gilrs.take());
+        }
 
         // Ruffle Together: the waiting screen until everyone has joined, then the game
         if self.coop_waiting {
@@ -447,6 +458,117 @@ impl MainWindow {
         }
 
         self.render_movie_if_needed();
+        if tv {
+            // the controller is read on these passes: keep them coming
+            let soon = Instant::now() + std::time::Duration::from_millis(16);
+            self.next_frame_time = Some(self.next_frame_time.map_or(soon, |at| at.min(soon)));
+        }
+    }
+
+    /// Ruffle Together TV mode: the controller's buttons go to the game as the key map's buttons
+    /// (through the session, or as slot 0's keys without one), its right stick is the mouse, and
+    /// the TV menu can quit.
+    fn tv_input(&mut self, gilrs: Option<&mut Gilrs>) {
+        use crate::coop::tv::{Action, Pad, Stick};
+        use gilrs::{Axis, Button};
+        let Some(mut tv) = crate::coop::tv::tv() else {
+            return;
+        };
+        let now = Instant::now();
+        let menu_before = tv.menu();
+        if let Some(gilrs) = gilrs {
+            if !std::mem::replace(&mut self.tv_pad_named, true)
+                && let Some((_, pad)) = gilrs.gamepads().next()
+            {
+                tv.connected(pad.name());
+            }
+            while let Some(Event { id, event, .. }) = gilrs.next_event() {
+                let pad = |button| match button {
+                    Button::South => Some(Pad::A),
+                    Button::East => Some(Pad::B),
+                    Button::West => Some(Pad::X),
+                    Button::North => Some(Pad::Y),
+                    Button::LeftTrigger => Some(Pad::Lb),
+                    Button::RightTrigger => Some(Pad::Rb),
+                    Button::LeftTrigger2 => Some(Pad::Lt),
+                    Button::RightTrigger2 => Some(Pad::Rt),
+                    Button::Select => Some(Pad::View),
+                    Button::Start => Some(Pad::Start),
+                    Button::LeftThumb => Some(Pad::L3),
+                    Button::RightThumb => Some(Pad::R3),
+                    Button::DPadUp => Some(Pad::Up),
+                    Button::DPadDown => Some(Pad::Down),
+                    Button::DPadLeft => Some(Pad::Left),
+                    Button::DPadRight => Some(Pad::Right),
+                    _ => None,
+                };
+                match event {
+                    EventType::Connected => tv.connected(gilrs.gamepad(id).name()),
+                    EventType::ButtonPressed(button, _) => {
+                        if let Some(pad) = pad(button) {
+                            tv.button(pad, true, now);
+                        }
+                    }
+                    EventType::ButtonReleased(button, _) => {
+                        if let Some(pad) = pad(button) {
+                            tv.button(pad, false, now);
+                        }
+                    }
+                    EventType::AxisChanged(axis, value, _) => {
+                        let stick = match axis {
+                            Axis::LeftStickX => Some(Stick::LeftX),
+                            Axis::LeftStickY => Some(Stick::LeftY),
+                            Axis::RightStickX => Some(Stick::RightX),
+                            Axis::RightStickY => Some(Stick::RightY),
+                            _ => None,
+                        };
+                        if let Some(stick) = stick {
+                            tv.stick(stick, value);
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+        tv.run_script(now);
+        let session = crate::coop::session();
+        let uses = match (&session, &self.tv_keys) {
+            (Some(session), _) => session.buttons_used(),
+            (None, Some((_, uses))) => *uses,
+            (None, None) => 0,
+        };
+        let size = self.gui.window().inner_size();
+        tv.update(now, (size.width as f64, size.height as f64), uses);
+        let buttons = tv.buttons(now, uses);
+        let actions = tv.take_actions();
+        let menu_changed = tv.menu() != menu_before;
+        drop(tv);
+        if let Some(mut session) = session {
+            session.pad(buttons);
+        } else if let Some((keys, _)) = &mut self.tv_keys
+            && matches!(self.loaded, LoadingState::Loaded)
+        {
+            for event in keys.events(0, buttons) {
+                self.player.handle_event(event);
+            }
+        }
+        for action in actions {
+            use ruffle_core::events::MouseButton;
+            let event = match action {
+                Action::MouseMove { x, y } => PlayerEvent::MouseMove { x, y },
+                Action::MouseDown { x, y } => PlayerEvent::MouseDown { x, y, button: MouseButton::Left, index: None },
+                Action::MouseUp { x, y } => PlayerEvent::MouseUp { x, y, button: MouseButton::Left },
+                Action::Quit => {
+                    crate::coop::goodbye("left from the TV menu");
+                    let _ = self.event_loop_proxy.send_event(RuffleEvent::ExitRequested);
+                    continue;
+                }
+            };
+            self.handle_player_event(event);
+        }
+        if menu_changed {
+            self.gui.window().request_redraw();
+        }
     }
 
     fn handle_player_event(&mut self, event: PlayerEvent) -> bool {
@@ -675,6 +797,9 @@ impl ApplicationHandler<RuffleEvent> for App {
             if coop_waiting {
                 let _ = window.request_inner_size(LogicalSize::new(640.0, 420.0));
                 window.set_title("Ruffle Together");
+                if start_fullscreen {
+                    window.set_fullscreen(Some(Fullscreen::Borderless(None)));
+                }
                 window.set_visible(true);
             } else if let Some(movie_url) = &movie_url {
                 gui.create_movie(
@@ -688,6 +813,17 @@ impl ApplicationHandler<RuffleEvent> for App {
             } else {
                 gui.show_open_dialog();
             }
+
+            // TV mode without a session: the controller presses slot 0's keys of the key map named
+            // on the command line, or else the keys most Flash games use
+            let tv_keys = (crate::coop::tv::on() && preferences.cli.coop.role().ok().flatten().is_none()).then(|| {
+                let named = std::env::args().any(|arg| arg == "--coop-keys" || arg.starts_with("--coop-keys="));
+                let game = named
+                    .then(|| preferences.cli.coop.game().ok())
+                    .flatten()
+                    .unwrap_or_else(|| crate::coop::keymap::Game::built_in("controller").expect("built in"));
+                (game.keys(), game.buttons_used())
+            });
 
             let mut loaded = LoadingState::Loading;
 
@@ -717,6 +853,8 @@ impl ApplicationHandler<RuffleEvent> for App {
                 next_frame_time: None,
                 coop_title: String::new(),
                 coop_waiting,
+                tv_keys,
+                tv_pad_named: false,
                 event_loop_proxy,
             });
         }

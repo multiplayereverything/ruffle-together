@@ -44,6 +44,7 @@ const BUILT_IN: &[(&str, &str)] = &[
     ("ultimate-crab-battle", include_str!("keys/ultimate-crab-battle.keys")),
     ("fireboy-watergirl", include_str!("keys/fireboy-watergirl.keys")),
     ("chaos-faction-2", include_str!("keys/chaos-faction-2.keys")),
+    ("controller", include_str!("keys/controller.keys")),
 ];
 
 /// A game's key map (`--coop-keys`).
@@ -364,6 +365,11 @@ impl Game {
     /// How many players the game has keys for.
     pub fn max_players(&self) -> u8 {
         self.slots.len() as u8
+    }
+
+    /// Every button some slot presses a key with.
+    pub fn buttons_used(&self) -> u16 {
+        self.slots.iter().flatten().fold(0, |all, (button, _)| all | button)
     }
 
     /// The keys each player slot presses in the game.

@@ -14,6 +14,7 @@ pub mod script;
 pub mod session;
 pub mod storage;
 pub mod replay;
+pub mod tv;
 
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex, MutexGuard, OnceLock};
@@ -168,6 +169,11 @@ pub struct CoopOpt {
     /// Testing: scripted input instead of the keyboard and mouse.
     #[clap(long, value_name = "FILE", help_heading = "Ruffle Together")]
     pub coop_script: Option<PathBuf>,
+
+    /// Testing: TV mode with a controller played from this file instead of a real one (see
+    /// coop/tv.rs for the commands).
+    #[clap(long, value_name = "FILE", help_heading = "Ruffle Together")]
+    pub coop_pad_script: Option<PathBuf>,
 
     /// Replay: number of frames to run.
     #[clap(long, default_value_t = 1500, help_heading = "Ruffle Together")]

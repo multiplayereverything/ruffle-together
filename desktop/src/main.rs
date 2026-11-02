@@ -293,6 +293,20 @@ fn main() -> Result<(), Error> {
         preferences.cli.no_gui = true;
     }
 
+    // Ruffle Together TV mode (from the launcher's TV mode): full screen, played with a controller
+    // (a lab's pad script plays it in a window)
+    if coop::tv::requested() {
+        preferences.cli.fullscreen = true;
+    }
+    if coop::tv::requested() || preferences.cli.coop.coop_pad_script.is_some() {
+        let script = match &preferences.cli.coop.coop_pad_script {
+            Some(path) => Some(coop::tv::PadScript::parse(&std::fs::read_to_string(path)?).map_err(|e| anyhow::anyhow!(e))?),
+            None => None,
+        };
+        coop::tv::start(script);
+        preferences.cli.no_gui = true;
+    }
+
     let result = App::new(preferences).and_then(|(mut app, event_loop)| {
         event_loop.run_app(&mut app).context("Event loop failure")
     });

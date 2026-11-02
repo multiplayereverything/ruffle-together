@@ -75,6 +75,38 @@ The relay needs the `ruffle-coop` game in mods-info first.
   "X's Ruffle is still running, but its game hasn't moved past frame N" (it froze), "nothing at all from X"
   (stopped or network down), or a connection that closed without a goodbye. The PC that froze logs it too.
 
+## TV mode (a controller, no keyboard or mouse)
+
+The launcher's TV mode starts Ruffle with the environment variable `RUFFLE_TOGETHER_TV=1` (and `--fullscreen`).
+Ruffle then opens full screen, the waiting screen included, and a controller plays. Older builds ignore the
+variable. A controller presses the key map's buttons, so every game's own key map decides what they do, for
+this PC's player only:
+
+| Controller (Xbox names) | Does |
+|---|---|
+| D-pad or left stick | UP DOWN LEFT RIGHT |
+| A, B, X, Y | FIRE, ALT, KEY1, KEY2 |
+| RB, LB | KEY3, KEY4 |
+| RT, LT | YES, NO (RT clicks instead in a game whose key map has no YES) |
+| View | VIEW |
+| Menu (Start), tapped | MENU, the game's own pause |
+| Menu (Start), held 1 s | the TV menu: Resume, Quit to launcher (D-pad or stick, A choose, B or Menu close) |
+| LS (L3) | QUIT |
+| Right stick, RS (R3) | this PC's mouse (a white arrow), and its click |
+
+- Only while Ruffle's window is in front, like the keyboard. The keyboard and mouse keep working too.
+- The game keeps running while the TV menu is open (it can't pause for everyone), with this player's buttons
+  let go. Quit to launcher leaves as closing the window does (the others see "Sam left"; their log says
+  "left from the TV menu"), and Ruffle exits with code 0.
+- Without a session the controller presses slot 0's keys of `--coop-keys` if given, or else arrows, Z, X,
+  Space, Enter, Shift, C, Esc and P (the built-in `controller` map).
+- Ruffle Together's own text (waiting screen, room code, notices, name tags, chat) is twice the size, and
+  hints name the controller's buttons. `RUFFLE_TOGETHER_PAD=xbox|playstation|nintendo` picks the names;
+  otherwise they come from the controller's name. Chat still needs a keyboard.
+- Labs: `--coop-pad-script FILE` plays a controller from a file, in a window, so nothing real is pressed
+  (`wait 3000`, `press start 1200`, `press a`, `hold right`, `release right`, `stick right 1 0 500`; times
+  in ms from when the window opens).
+
 ## For game builders: key maps
 
 `--coop-keys` takes a built-in map name or the path of a key map file (every player must use the same map; a

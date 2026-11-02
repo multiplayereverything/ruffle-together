@@ -429,3 +429,17 @@ Plan: docs/superpowers/plans/2026-10-28-ruffle-together.md · Spec: docs/superpo
   mods-info 7ecf0bb (user: "bump mods-info"; rc-1.0.5, max_players 8, live). Public relay with the packaged exe:
   6 headless CF2 players room 843JQ 3000 frames in sync (median 186 ms); a first try a minute after the push hung
   (two players never got in), likely before the relay re-read mods-info.
+- TV mode (launcher session's request, user: "Yes, build it"): `RUFFLE_TOGETHER_TV=1` (environment, so older builds
+  ignore it) turns on desktop/src/coop/tv.rs: full screen (the waiting screen too), a controller presses the key
+  map's buttons for this PC's slot (D-pad/left stick UP-RIGHT, A FIRE, B ALT, X KEY1, Y KEY2, RB KEY3, LB KEY4, RT
+  YES or the click when the map has no YES, LT NO, View VIEW, Start tapped MENU, L3 QUIT, right stick + R3 the
+  mouse), Start held 1 s opens Resume / Quit to launcher (goodbye "left from the TV menu", exit 0), only while the
+  window has focus, Ruffle Together's text x2, hints in the controller's names (`RUFFLE_TOGETHER_PAD`). In a
+  session only the buttons travel (Session::pad ORed into local_input). Without a session: slot 0 of an explicit
+  --coop-keys, else the built-in `controller` map. Labs: `--coop-pad-script FILE`. Tests 171/171 (new: tv.rs,
+  a_controller_plays_like_the_keyboard: a friend with only a controller changes the game the same on both PCs).
+  Replays new = 1.0.5 build: BIC fa623659, GM2 4p 8e30f66c, TW tw-coop-2p.txt 3000 f 16e6a08f, API demo 3fa99a8d.
+  Demo: lab relay + direct desync none, windows_lab pressure PASS. Real windows: solo pad script quits (exit 0
+  after 9.1 s), control without Quit stays open, TV=1 window 1920x1080 at 0,0, 1.0.5 starts with TV=1 +
+  --fullscreen; 2-window session, friend quits from the TV menu, host logs "Sam left (left from the TV menu)" and
+  plays on, no desync. Not tested: a real controller (gilrs mapping, trigger thresholds, names). Not released.

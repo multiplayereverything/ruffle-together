@@ -150,6 +150,8 @@ pub struct Session {
     /// How many local inputs were sent (the next one is for frame `delay + local_sent`).
     local_sent: u32,
     held: HashSet<PhysicalKey>,
+    /// The buttons TV mode's controller holds (see `tv.rs`), with the keyboard's.
+    pad: u16,
     focused: bool,
     mouse: Option<(i32, i32, bool)>,
     /// What this PC typed and hasn't sent yet (up to `Typed::MAX` go with each frame).
@@ -724,6 +726,7 @@ impl Session {
             script: opts.script,
             local_sent: 0,
             held: HashSet::new(),
+            pad: 0,
             focused: true,
             mouse: None,
             typed: VecDeque::new(),
@@ -813,6 +816,16 @@ impl Session {
         }
     }
 
+    /// The game's buttons TV mode's controller holds now.
+    pub fn pad(&mut self, buttons: u16) {
+        self.pad = buttons;
+    }
+
+    /// Every button the game's key map has.
+    pub fn buttons_used(&self) -> u16 {
+        self.game.buttons_used()
+    }
+
     /// The host's mouse, in stage twips (see `Player::viewport_to_stage`).
     pub fn mouse(&mut self, x: i32, y: i32, down: Option<bool>) {
         let was_down = self.mouse.is_some_and(|(_, _, down)| down);
@@ -860,7 +873,7 @@ impl Session {
             self.typed.pop_front();
         }
         InputFrame {
-            buttons: if self.focused { self.game.local_buttons(&self.held) } else { 0 },
+            buttons: if self.focused { self.game.local_buttons(&self.held) | self.pad } else { 0 },
             // every PC's mouse travels as its slot's mouse; only the host's moves Ruffle's mouse
             mouse: self.mouse,
             text,
@@ -1406,8 +1419,14 @@ mod tests {
     /// Runs one PC: starts the session, then plays until `frames` (or until `stop_at`, when it
     /// drops the session to leave). Returns the session's final state and its fingerprints.
     fn play(opts: SessionOpts, frames: u32, stop_at: Option<u32>) -> (SessionState, Session) {
+        play_holding(opts, frames, stop_at, 0)
+    }
+
+    /// `play`, with TV mode's controller holding `pad` the whole time.
+    fn play_holding(opts: SessionOpts, frames: u32, stop_at: Option<u32>, pad: u16) -> (SessionState, Session) {
         let swf = opts.swf.clone();
         let mut session = Session::start(opts).expect("session");
+        session.pad(pad);
         let player = headless_player(&swf, Some(session.clock()), session.take_storage())
             .expect("player");
         let mut player = player.lock().expect("player");
@@ -1470,6 +1489,28 @@ mod tests {
         // the same game on both PCs, checked every 25 frames (frames 24, 49, ... 974 are check frames)
         assert_eq!(host_session.print_at(974), join_session.print_at(974));
         assert!(host_session.print_at(974).is_some());
+    }
+
+    /// TV mode: a friend's controller (no script, no keyboard) moves their player like their keys
+    /// would, and every PC's game sees it on the same frame.
+    #[test]
+    fn a_controller_plays_like_the_keyboard() {
+        use crate::coop::lockstep::{FIRE, RIGHT};
+        let Some(swf) = test_swf() else { return };
+        let run = |pad: u16| {
+            let port = free_port();
+            let host_swf = swf.clone();
+            let host = thread::spawn(move || play(opts(Role::HostDirect { port }, &host_swf, 0), 1000, None));
+            thread::sleep(Duration::from_millis(300));
+            let mut friend = opts(Role::JoinDirect { addr: format!("127.0.0.1:{port}") }, &swf, 0);
+            friend.script = None;
+            let join = thread::spawn(move || play_holding(friend, 1000, None, pad));
+            let ((host_state, host), (join_state, join)) = (host.join().expect("host"), join.join().expect("join"));
+            assert_eq!((host_state.desync_at, join_state.desync_at), (None, None));
+            assert_eq!(host.print_at(974), join.print_at(974));
+            host.print_at(974).expect("frame 974")
+        };
+        assert_ne!(run(RIGHT | FIRE), run(0), "the controller's buttons reach the game");
     }
 
     /// The host measures every friend's round trip and tells everyone: both PCs know the ping
