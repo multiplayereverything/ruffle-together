@@ -443,3 +443,11 @@ Plan: docs/superpowers/plans/2026-10-28-ruffle-together.md · Spec: docs/superpo
   after 9.1 s), control without Quit stays open, TV=1 window 1920x1080 at 0,0, 1.0.5 starts with TV=1 +
   --fullscreen; 2-window session, friend quits from the TV menu, host logs "Sam left (left from the TV menu)" and
   plays on, no desync. Not tested: a real controller (gilrs mapping, trigger thresholds, names). Not released.
+- Release 1.0.6 (03a2aa1, tag v1.0.6, user: "Release and mods-info"): TV mode and the solo key maps. Tests 173/173;
+  replays BIC fa623659, GM2 4p 8e30f66c, TW territory-war-2p 3000 f ad6fe22d, API demo 3fa99a8d twice (all as 1.0.5);
+  API demo lab relay and direct desync none. Live relay 165.232.82.11:25569 with the downloaded exe: BIC 1500 frames
+  room RNYZW in sync. Zip sha256 f84d2d5a3380672bc8998d50cf49eb1edeb4838b36d4cd9adce9d94346d4f303 (re-downloaded,
+  same), exe ebe721fe5988cf26f0b89773cff7483ef96689cf436e9723d0cae19c8fc52287. mods-info: latest and min 1.0.6, rc-1.0.6.
+  Not tested: a real controller; two real windows on this exe (they passed on the TV code before the bump).
+  Trap: in a worktree the build script doesn't rerun on a new commit, so `--version` kept 22a75b1 for every TV test
+  build. Before packaging: `touch desktop/build.rs`, rebuild, and check `ruffle_desktop --version` names HEAD.
