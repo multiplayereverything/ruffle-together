@@ -451,3 +451,20 @@ Plan: docs/superpowers/plans/2026-10-28-ruffle-together.md · Spec: docs/superpo
   Not tested: a real controller; two real windows on this exe (they passed on the TV code before the bump).
   Trap: in a worktree the build script doesn't rerun on a new commit, so `--version` kept 22a75b1 for every TV test
   build. Before packaging: `touch desktop/build.rs`, rebuild, and check `ruffle_desktop --version` names HEAD.
+- Release 1.0.7 (47d1806, tag v1.0.7, user: "Yes, release 1.0.7"): `coop.keys` replaced the slot side of the map but
+  not `local:`, so physical keys kept the launch line's map (reported as Space is X, Q does little). `Session::tick`
+  now takes the new map from the Stepper (`take_new_game`, `Game::switch_to`); no `local:` line leaves the keys. Labs
+  missed it because a session with `--coop-script` never reads the keyboard. Tests 175/175 (new:
+  physical_keys_follow_the_games_own_map, a_games_own_map_takes_over_this_pcs_keys). Replays on the release exe: BIC
+  fa623659, GM2 4p 8e30f66c, TW territory-war-279.swf ad6fe22d, API demo 3fa99a8d twice. API demo through the public
+  relay room 9F725 desync none. Downloaded exe, BIC 1500 frames through the relay room 7BZ83 in sync. Zip sha256
+  a0216d27e5cd060b632c793071f2011ac9940758ccd6b5caea0276b08a382bf2 (re-downloaded, same), exe
+  0420bd90c7edd983495a01ae8715947e529708420ea919202048b61936bb2870. mods-info: latest and min 1.0.7, rc-1.0.7.
+  Real-window keys (PostMessage to the lab's windows only): Madness keys_lab on the release exe PASS (v1.0.6 22/30,
+  fix 30/30). Ten launcher games on the fix before the bump, physical key to button against each map: Electricman 2 HS,
+  Hobo, Dad 'n Me, Zombotron (map at frame 661), Madness, Ultimate Crab Battle, Intrusion (frame 135), Intrusion 2 pass;
+  Raft Wars and WHG never call coop.keys and are unchanged. Electricman's friend window twice lost keys: real focus loss
+  on the one run logged, the same pattern on the other. Madness 1.1 line stealth-hunter-2: holding Q/R/E counted 2 on
+  1.0.6, 1 now. A 10 ms Space tap is missed on both builds (shorter than a frame). Not tested: a person on a real
+  keyboard; button to character move outside Madness; lab.py relay mode with lag (local relay not reachable from the
+  worktree). `getInstanceAtDepth(NaN)` gives depth 0 in Ruffle by reading the code; no Flash Player here to compare.
