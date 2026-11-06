@@ -16,6 +16,8 @@ pub struct Stepper {
     loaded: bool,
     /// The key map the game gave with `coop.keys`, if it gave one.
     game_keys: Option<String>,
+    /// A map the game just gave, until the session takes it for this PC's own keys.
+    new_game: Option<Game>,
     /// What the game can ask through ExternalInterface (every slot's mouse, the players).
     api: Arc<Mutex<CoopApi>>,
     mice: Mice,
@@ -25,7 +27,7 @@ impl Stepper {
     pub fn new(keys: GameKeys, players: u8, local_slot: u8) -> Self {
         let mut api = CoopApi::new(players, local_slot);
         apply_mouse_rules(&mut api, &keys);
-        Self { keys, loaded: false, game_keys: None, api: Arc::new(Mutex::new(api)), mice: Mice::default() }
+        Self { keys, loaded: false, game_keys: None, new_game: None, api:Arc::new(Mutex::new(api)), mice: Mice::default() }
     }
 
     #[cfg(test)]
@@ -153,8 +155,14 @@ impl Stepper {
             }
             self.keys = game.keys();
             apply_mouse_rules(&mut api, &self.keys);
+            self.new_game = Some(game);
         }
         player.set_coop_camera(api.local_camera().map(|c| (c.x, c.y, c.zoom)));
+    }
+
+    /// The map the game gave with `coop.keys` since the last call, if it gave one.
+    pub fn take_new_game(&mut self) -> Option<Game> {
+        self.new_game.take()
     }
 
     /// Lets go of every key, e.g. when the session ends.

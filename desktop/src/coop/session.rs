@@ -48,7 +48,7 @@ const CHAT_SHOWN: Duration = Duration::from_secs(12);
 const PING_EVERY: Duration = Duration::from_secs(2);
 
 /// Ruffle Together's own version (the Ruffle it is built on has its own).
-pub const VERSION: &str = "1.0.6";
+pub const VERSION: &str = "1.0.7";
 
 /// This build, as the relay and the other players see it: a different build is refused.
 pub fn build_id() -> String {
@@ -1024,6 +1024,10 @@ impl Session {
                 }
             }
             self.stepper.step(player, &inputs);
+            // this PC's keys follow the game's own map: only inputs change, and those travel
+            if let Some(game) = self.stepper.take_new_game() {
+                self.game.switch_to(game);
+            }
             for (who, whose) in self.stepper.take_busy() {
                 if who == self.local_index {
                     let text = format!("{} has that open: wait until they close it", self.name(whose));
@@ -1458,7 +1462,7 @@ mod tests {
 
     #[test]
     fn build_id_names_this_release() {
-        assert!(build_id().starts_with("rc-1.0.6#"), "{}", build_id());
+        assert!(build_id().starts_with("rc-1.0.7#"), "{}", build_id());
         // the relay keeps 32 characters of a version
         assert!(build_id().len() <= 32);
     }
@@ -1595,6 +1599,93 @@ mod tests {
         }
         assert_eq!(host.state.desync_at, None);
         assert_eq!(join.state.desync_at, None);
+    }
+
+    /// A game's `coop.keys` map decides what this PC's physical keys do, as Madness: Project Nexus
+    /// and Electricman 2 HS expect on their launch line (`--coop-keys gun-mayhem-2`). Scripts feed
+    /// buttons directly, so this holds keys the way the window does and reads what the game hears.
+    #[test]
+    fn physical_keys_follow_the_games_own_map() {
+        use crate::coop::lockstep::{ALT, FIRE, LEFT, RIGHT};
+        let swf = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/coop/clicks/Clicks.swf");
+        let line = |role| {
+            let mut o = opts(role, &swf, 0);
+            o.game = Game::built_in("gun-mayhem-2").expect("built in");
+            o.script = None;
+            o
+        };
+        let slots = "slot 0: LEFT=65 RIGHT=68 FIRE=32 ALT=81\nslot 1: LEFT=65 RIGHT=68 FIRE=32 ALT=81\n";
+        let port = free_port();
+        let host = line(Role::HostDirect { port });
+        let friend = line(Role::JoinDirect { addr: format!("127.0.0.1:{port}") });
+        let host = thread::spawn(move || {
+            let swf = host.swf.clone();
+            let mut session = Session::start(host).expect("session");
+            let player = headless_player(&swf, Some(session.clock()), session.take_storage()).expect("player");
+            let mut player = player.lock().expect("player");
+            let run_to = |session: &mut Session, player: &mut Player, frame: u32| {
+                let end = Instant::now() + Duration::from_secs(60);
+                while session.frame() < frame && session.state.closed.is_none() && Instant::now() < end {
+                    session.tick(player);
+                    thread::sleep(Duration::from_millis(1));
+                }
+                assert!(session.frame() >= frame, "{:?}", session.state);
+            };
+            let game_gives = |session: &mut Session, player: &mut Player, map: &str| {
+                let answer = session.stepper.api().lock().expect("api").answer("coop.keys", &[Value::String(map.into())]);
+                assert_eq!(answer, Value::Bool(true));
+                // the frame that runs next picks it up, as if the game had called it during that frame
+                let next = session.frame() + 1;
+                run_to(session, player, next);
+            };
+            // what slot 0's buttons are in the game while `key` is held; 3 is the input delay
+            let held = |session: &mut Session, player: &mut Player, key: PhysicalKey| -> u16 {
+                session.key(key, true);
+                let frame = session.frame() + 8;
+                run_to(session, player, frame);
+                let buttons = session.stepper.api().lock().expect("api").answer("coop.buttons", &[Value::Number(0.0)]);
+                session.key(key, false);
+                let frame = session.frame() + 8;
+                run_to(session, player, frame);
+                match buttons {
+                    Value::Number(n) => n as u16,
+                    other => panic!("{other:?}"),
+                }
+            };
+
+            run_to(&mut session, &mut player, 5);
+            assert_eq!(held(&mut session, &mut player, PhysicalKey::KeyX), ALT, "the start map");
+            assert_eq!(held(&mut session, &mut player, PhysicalKey::KeyQ), 0);
+
+            let map = format!("{slots}local: LEFT=65 RIGHT=68 FIRE=32 ALT=81\n");
+            game_gives(&mut session, &mut player, &map);
+            assert_eq!(session.game.local_buttons(&HashSet::from([PhysicalKey::KeyQ])), ALT, "on the next frame");
+            assert_eq!(held(&mut session, &mut player, PhysicalKey::KeyQ), ALT);
+            assert_eq!(held(&mut session, &mut player, PhysicalKey::Space), FIRE);
+            assert_eq!(held(&mut session, &mut player, PhysicalKey::KeyA), LEFT);
+            assert_eq!(held(&mut session, &mut player, PhysicalKey::KeyX), 0, "the start map's keys are gone");
+            assert_eq!(held(&mut session, &mut player, PhysicalKey::KeyZ), 0);
+            session.key(PhysicalKey::Slash, true);
+            assert_eq!(session.chat_view().1.as_deref(), Some(""), "/ is still the chat box");
+            session.key(PhysicalKey::Escape, true);
+
+            // says nothing about this PC's keys: they stay
+            game_gives(&mut session, &mut player, slots);
+            assert_eq!(held(&mut session, &mut player, PhysicalKey::KeyD), RIGHT);
+
+            // gives / to the game
+            let map = format!("{slots}local: FIRE=191\n");
+            game_gives(&mut session, &mut player, &map);
+            assert_eq!(held(&mut session, &mut player, PhysicalKey::Slash), FIRE);
+            assert_eq!(session.chat_view().1, None);
+
+            run_to(&mut session, &mut player, 300);
+            session.state.clone()
+        });
+        thread::sleep(Duration::from_millis(300));
+        let (friend_state, _friend) = play(friend, 300, None);
+        let host_state = host.join().expect("host");
+        assert_eq!((host_state.desync_at, friend_state.desync_at), (None, None));
     }
 
     /// The host's `--coop-option`s reach every player's `coop.option`; a friend's own are ignored.

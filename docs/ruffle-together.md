@@ -1,6 +1,6 @@
 # Ruffle Together
 
-Version 1.0.6 (build id `rc-1.0.6#<commit>`; players must use the same build).
+Version 1.0.7 (build id `rc-1.0.7#<commit>`; players must use the same build).
 
 Play a local-multiplayer Flash game online with up to 7 friends (as many as the game has players). Every PC runs the same game in this Ruffle
 build; only the key presses travel, and every frame runs on every PC with every player's keys. Everyone gets
@@ -187,7 +187,8 @@ slot 0, no camera), so one SWF works everywhere. The older flat `RuffleTogether.
 - **Labels:** Ruffle draws them over the game (white text with a shadow, centred above the clip's top edge),
   following each PC's camera; the game never sees them. Paths are `_root` / `root` then instance names with dots.
 - **`coop.keys`:** the map replaces `--coop-keys` from the next frame, on every PC at once (held keys are let go
-  first; the same map again changes nothing). A game can switch maps per mode, e.g. menus vs. a match.
+  first; the same map again changes nothing). Its `local:` line replaces the keyboard's keys too; a map with no
+  `local:` line leaves them as they were. A game can switch maps per mode, e.g. menus vs. a match.
 - In a session `ExternalInterface.available` is true and every other call returns undefined; there is no
   JavaScript.
 - Input scripts drive any slot's mouse: `move X Y slot`, `click X Y slot` (the host's when the slot is left out).

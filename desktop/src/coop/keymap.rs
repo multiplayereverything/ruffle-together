@@ -379,6 +379,13 @@ impl Game {
         self.slots.iter().flatten().fold(0, |all, (button, _)| all | button)
     }
 
+    /// The game's own map (`coop.keys`) replaces this one. A map with no `local:` line says nothing
+    /// about this PC's keys, so they stay.
+    pub fn switch_to(&mut self, new: Game) {
+        let local = if new.local.is_empty() { std::mem::take(&mut self.local) } else { new.local };
+        *self = Game { local, ..new };
+    }
+
     /// The keys each player slot presses in the game.
     pub fn keys(&self) -> GameKeys {
         let slots: Vec<Vec<GameKey>> = self
@@ -682,6 +689,27 @@ zone 9: 1,2 3x4").is_err());
 
     /// Gun Mayhem 2's own defaults (savedata2.controlarray): player 1 arrows + Z shoot + X
     /// grenade, player 2 W A S D + T shoot + Y grenade; a player may use either set on their PC.
+    #[test]
+    fn a_games_own_map_takes_over_this_pcs_keys() {
+        let madness = "slot 0: UP=87 FIRE=32 ALT=81\nlocal: UP=87,38 FIRE=32 ALT=81\n";
+        let mut game = Game::built_in("gun-mayhem-2").expect("built in");
+        assert_eq!(game.local_buttons(&held(&[PhysicalKey::KeyX])), ALT);
+        game.switch_to(Game::parse("game", madness).expect("map"));
+        assert_eq!(game.local_buttons(&held(&[PhysicalKey::KeyX])), 0);
+        assert_eq!(game.local_buttons(&held(&[PhysicalKey::KeyQ])), ALT);
+        assert_eq!(game.local_buttons(&held(&[PhysicalKey::Space])), FIRE);
+        assert_eq!(game.local_buttons(&held(&[PhysicalKey::ArrowUp])), UP);
+        assert_eq!(game.buttons_used(), UP | FIRE | ALT);
+
+        game.switch_to(Game::parse("game", "slot 0: FIRE=13\n").expect("map"));
+        assert_eq!(game.local_buttons(&held(&[PhysicalKey::KeyQ])), ALT, "no local line: this PC's keys stay");
+        assert_eq!(game.buttons_used(), FIRE, "but the slots are the new map's");
+
+        assert!(!game.has_local_code(191));
+        game.switch_to(Game::parse("game", "slot 0: FIRE=13\nlocal: FIRE=191\n").expect("map"));
+        assert!(game.has_local_code(191));
+    }
+
     #[test]
     fn gun_mayhem_2_keys() {
         let gm2 = game("gun-mayhem-2");

@@ -77,7 +77,7 @@ local value that reaches gameplay makes the PCs' games split (the window title s
 | `coop.mouse.clicker` | shared | Inside a mouse handler (`CLICK`, `MOUSE_DOWN`, `onPress`, `onRelease`...), the slot whose mouse caused it; `undefined` elsewhere. One "Ready" button for everyone: `ready[clicker] = true` |
 | `coop.mouse.hovered(slot)` | shared | The path of what that player's mouse is on (`"_root.menu.sword"`), as of the last frame; `undefined` while it is on nothing clickable or out of the game |
 | `coop.typed(slot)` | shared | What that player typed this frame, `"\b"` for Backspace and `"\n"` for Enter. Calling it tells Ruffle the game wants every typed character for the next 60 frames (see "Typing" below) |
-| `coop.keys(text)` | shared | The game's own key map, in the `.keys` format (`"slot 0: UP=38 FIRE=32\n..."`), used from the next frame on every PC; held keys are let go first; the same map again changes nothing. `true` if it parsed |
+| `coop.keys(text)` | shared | The game's own key map, in the `.keys` format (`"slot 0: UP=38 FIRE=32\n..."`), used from the next frame on every PC: its `slot` lines say what each player's buttons press in the game, its `local:` line what each PC's keyboard presses (no `local:` line: the keyboard stays as it was; before 1.0.7 this line was ignored). Held keys are let go first; the same map again changes nothing. `true` if it parsed |
 
 `coop.buttons` is the easy way to add players to a single-player game: read each slot's buttons and move
 each character, instead of faking keyboard keys.
