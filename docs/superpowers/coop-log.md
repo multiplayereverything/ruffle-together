@@ -486,4 +486,13 @@ Plan: docs/superpowers/plans/2026-10-28-ruffle-together.md · Spec: docs/superpo
   whose executor is dropped, so replay and `--coop-headless` never run that future (from the code). Windows run it from
   the winit event loop, on real time, so the frame it lands on might differ between PCs (not measured).
   Both fixes together: tests 175/175, render 53/53, BIC fa623659, GM2 8e30f66c, TW ad6fe22d, API demo 3fa99a8d twice,
-  public relay in sync, Madness keys_lab PASS. Not released.
+  public relay in sync, Madness keys_lab PASS. Released as 1.0.8 below.
+- Release 1.0.8 (3d7c62d, tag v1.0.8, user: "Yes, release 1.0.8"): the two fixes above. Tests 175/175, render 53/53, AVM1
+  776. On the release exe: BIC fa623659, GM2 8e30f66c, TW ad6fe22d, API demo 3fa99a8d twice, public relay room N7HFB in
+  sync; Electricman in two windows alive with no dead lines or desync after 240 s. Downloaded exe, BIC 1500 frames
+  through the relay room NA2X6 in sync. Zip sha256 cd2392370a53d1d15a7b788606c724e72a43f13d2fd0e6e42b2741c2dd8b565b
+  (re-downloaded, same), exe b7673d9d5da0104006e2114f245866b6f2a6c0db03b57d4f53ff01734b837e81. mods-info: latest and
+  min 1.0.8, rc-1.0.8. Madness keys_lab on this exe: FAIL once on `host E` alone (not seen again), then 1 fail (friend
+  keys stop from Q on) and 3 passes; 1.0.7 the same run: 1 fail (friend from A on) and 3 passes. desktop/src/coop only
+  changed the version, so this isn't new; lost focus is the likely cause, not proven. The Madness crash run itself was on
+  the fix before the bump, not on this exe (85 minutes). Records for 3 games still ask for 1.0.7; left for their sessions.
