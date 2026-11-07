@@ -22,6 +22,9 @@ pub struct ShapeTessellator {
 
 const TESSELLATION_EPSILON: f32 = 0.0000001;
 
+/// The smallest stroke tolerance, as a part of the line's width.
+const MIN_STROKE_TOLERANCE: f32 = 0.000001;
+
 impl ShapeTessellator {
     pub fn new() -> Self {
         Self {
@@ -186,7 +189,11 @@ impl ShapeTessellator {
                     let width = width.max(min_screen_width);
 
                     // Larger scales require more precise tessellation to avoid artifacts
-                    let tolerance = StrokeOptions::DEFAULT_TOLERANCE / scale;
+                    // Never so small that it can't change the radius in f32: lyon's arc step would
+                    // be 0 and its recursion would overflow the stack. Only lines over 100,000 pixels
+                    // wide on screen reach this.
+                    let tolerance =
+                        (StrokeOptions::DEFAULT_TOLERANCE / scale).max(width * MIN_STROKE_TOLERANCE);
                     let mut stroke_options = StrokeOptions::default()
                         .with_line_width(width)
                         .with_tolerance(tolerance)
@@ -468,6 +475,55 @@ impl StrokeVertexConstructor<Vertex> for RuffleVertexCtor {
             x: vertex.position().x,
             y: vertex.position().y,
             color: self.color,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::backend::RenderBackend;
+    use crate::bitmap::{BitmapHandle, BitmapSize};
+    use swf::{Color, LineJoinStyle, LineStyle, Point, Rectangle, Twips};
+
+    struct NoBitmaps;
+
+    impl BitmapSource for NoBitmaps {
+        fn bitmap_size(&self, _id: u16) -> Option<BitmapSize> {
+            None
+        }
+
+        fn bitmap_handle(&self, _id: u16, _renderer: &mut dyn RenderBackend) -> Option<BitmapHandle> {
+            None
+        }
+    }
+
+    /// At a huge scale the tolerance is too small to change the radius in f32, lyon's arc step becomes 0
+    /// and it recurses until the stack overflows, which no script can catch.
+    #[test]
+    fn round_joins_survive_a_huge_scale() {
+        let style = LineStyle::new()
+            .with_width(Twips::from_pixels(1.0))
+            .with_color(Color::WHITE)
+            .with_join_style(LineJoinStyle::Round);
+        let point = |x, y| Point::new(Twips::from_pixels(x), Twips::from_pixels(y));
+        for scale in [1.0, 1e6, 1e9, 1e30, f32::MAX, f32::INFINITY] {
+            let shape = DistilledShape {
+                paths: vec![DrawPath::Stroke {
+                    style: &style,
+                    is_closed: false,
+                    commands: vec![
+                        DrawCommand::MoveTo(point(0.0, 0.0)),
+                        DrawCommand::LineTo(point(10.0, 0.0)),
+                        DrawCommand::LineTo(point(10.0, 10.0)),
+                    ],
+                }],
+                shape_bounds: Rectangle::default(),
+                edge_bounds: Rectangle::default(),
+                id: 1,
+            };
+            let mesh = ShapeTessellator::new().tessellate_shape_with_scale(shape, &NoBitmaps, scale);
+            assert!(!mesh.draws.is_empty(), "scale {scale}");
         }
     }
 }

@@ -468,3 +468,22 @@ Plan: docs/superpowers/plans/2026-10-28-ruffle-together.md · Spec: docs/superpo
   1.0.6, 1 now. A 10 ms Space tap is missed on both builds (shorter than a frame). Not tested: a person on a real
   keyboard; button to character move outside Madness; lab.py relay mode with lag (local relay not reachable from the
   worktree). `getInstanceAtDepth(NaN)` gives depth 0 in Ruffle by reading the code; no Flash Player here to compare.
+- Stack overflow while drawing (Madness bot build, about f167450, 1.0.6 and 1.0.7 code). Not script: ordinary AS2
+  recursion costs about 2 KB per call. A lab build caught the overflow and wrote the stack: `tessellate_shape_with_scale`
+  into lyon's stroker, about 14,600 frames (lyon's `tessellate_arc`, by reading it; the symbols only named its caller).
+  At a huge scale the tolerance (0.1 / scale) can't change the radius in f32, the arc step is 0, the recursion count
+  is infinite. Fix: `MIN_STROKE_TOLERANCE` in `render/src/tessellator.rs`; only lines over 100,000 pixels wide on screen
+  change. Test `round_joins_survive_a_huge_scale` overflowed before it. Repro on the fix: ran on to f170000, exit 0.
+  Trigger in that run: shapes 2541 (Parts - Head), 7047 (Parts - Body), 2783, 2736, scales up to 110,542,960, about x2.44 a step;
+  the first above the limit was 7047 at 4,853,962. Unknown: why a character's parts get that scale, or whether real
+  play can reach it.
+- `removeMovieClip(this); unloadMovie(this);` unloaded the whole movie (Electricman 2 HS, real windows). The removed
+  clip's `this` reads as "" and `action_get_url_2` resolved that from the root. Fix: a clip reference that no longer
+  resolves targets nothing. Test `avm1/unload_removed_this` (SWF written by `test.py`, expected output NOT from Flash: no
+  Flash Player here; "Flash ignores it" is inferred from the original game working there). AVM1 tests 776 pass.
+  Two windows: 1.0.7 root frame 0 of 0 in both, fix root frame 6 of 36 in both after 240 s, no desync.
+  Lab blind spot: a root unload only runs through `spawn_future`, and `headless_player` uses `NullNavigatorBackend`,
+  whose executor is dropped, so replay and `--coop-headless` never run that future (from the code). Windows run it from
+  the winit event loop, on real time, so the frame it lands on might differ between PCs (not measured).
+  Both fixes together: tests 175/175, render 53/53, BIC fa623659, GM2 8e30f66c, TW ad6fe22d, API demo 3fa99a8d twice,
+  public relay in sync, Madness keys_lab PASS. Not released.

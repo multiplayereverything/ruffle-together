@@ -1,6 +1,6 @@
 # Ruffle Together
 
-Version 1.0.7 (build id `rc-1.0.7#<commit>`; players must use the same build).
+Version 1.0.8 (build id `rc-1.0.8#<commit>`; players must use the same build).
 
 Play a local-multiplayer Flash game online with up to 7 friends (as many as the game has players). Every PC runs the same game in this Ruffle
 build; only the key presses travel, and every frame runs on every PC with every player's keys. Everyone gets

@@ -1363,6 +1363,10 @@ impl<'a, 'gc> Activation<'a, 'gc> {
         } else if action.is_load_vars() || action.is_target_sprite() {
             if let Some(target) = target_val.as_object(self) {
                 target.as_display_object()
+            } else if matches!(target_val, Value::MovieClip(_)) {
+                // That clip is gone. Its reference reads as "", which must not mean the root:
+                // `removeMovieClip(this); unloadMovie(this);` would unload the whole movie.
+                None
             } else {
                 let start = self.target_clip_or_root();
                 self.resolve_target_display_object(start, target_val, true)?
